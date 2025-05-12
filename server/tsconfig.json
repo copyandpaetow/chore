@@ -2,12 +2,11 @@
 	"compilerOptions": {
 		"target": "ESNext",
 		"useDefineForClassFields": true,
-		"module": "commonjs",
+		"module": "NodeNext",
 		"lib": ["ESNext", "DOM", "DOM.Iterable"],
 		"skipLibCheck": true,
 
 		/* Bundler mode */
-		"moduleResolution": "node",
 		"allowImportingTsExtensions": true,
 		"resolveJsonModule": true,
 		"declaration": true,
