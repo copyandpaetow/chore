@@ -1,0 +1,51 @@
+services:
+  server:
+    image: node:24-alpine
+    working_dir: /app
+    command: sh -c "npm ci --production && node src/index.js"
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./server:/app
+      - ./server/db:/app/db
+    environment:
+      - NODE_ENV=production
+      - DB_PATH=/app/db/todo.db
+      - PORT=3000
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  client:
+    image: node:24-alpine
+    working_dir: /app
+    # Build once and serve using a lightweight server
+    command: >
+      sh -c "
+        if [ ! -d 'dist' ] || [ ! -f '.build-complete' ]; then
+          npm ci --production &&
+          npm run build &&
+          touch .build-complete &&
+          npm install -g serve
+        fi &&
+        serve -s dist -l 8080"
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./client:/app
+    environment:
+      - NODE_ENV=production
+      - VITE_API_URL=http://raspberrypi.local:3000
+    deploy:
+      resources:
+        limits:
+          cpus: "0.4"
+          memory: 200M
+        reservations:
+          memory: 100M

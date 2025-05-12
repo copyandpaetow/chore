@@ -1,0 +1,10 @@
+{
+	"name": "chore",
+	"version": "0.0.1",
+	"license": "MIT",
+	"scripts": {},
+	"workspaces": [
+		"/lib",
+		"/client"
+	]
+}
