@@ -9,22 +9,8 @@ import {
 	reserveUnreservedChore,
 	updateChoreNextDueDate,
 	updateChoreReservation,
-} from "./db.ts";
-
-export type Difficulty = 1 | 2 | 3 | 4 | 5;
-
-export type Chore = {
-	id: string;
-	title: string;
-	description: string;
-	createdAt: string;
-	frequency: string;
-	nextDueDate: string;
-	difficulty: Difficulty;
-	reservedBy: string | null;
-	reservedUntil: string | null;
-	isPrivate: boolean;
-};
+} from "./queries.ts";
+import { ChoreSchema, Difficulty } from "../db/chore.ts";
 
 export const calculateNextDueDate = (
 	frequency: string,
@@ -55,26 +41,14 @@ export const createNewChore = (
 	frequency: string,
 	description: string = "",
 	difficulty: Difficulty = 3,
-	isPrivate: boolean = false,
-	firstDueDate?: string
-): Chore | null => {
+	is_private: boolean = false,
+	first_due_date?: string
+): ChoreSchema | null => {
 	const choreId = randomUUID();
 	const now = Date.now();
-	const nextDueDate = firstDueDate
-		? new Date(firstDueDate).getTime()
+	const nextDueDate = first_due_date
+		? new Date(first_due_date).getTime()
 		: calculateNextDueDate(frequency);
-
-	console.log({
-		choreId,
-		title,
-		description,
-		now,
-		frequency,
-		userId,
-		nextDueDate,
-		difficulty,
-		isPrivate,
-	});
 
 	const newChore = createChore.get(
 		choreId,
@@ -85,7 +59,7 @@ export const createNewChore = (
 		userId,
 		nextDueDate,
 		difficulty,
-		isPrivate ? 1 : 0
+		is_private ? 1 : 0
 	);
 
 	if (!newChore) return null;
@@ -94,17 +68,17 @@ export const createNewChore = (
 		id: newChore.id,
 		title: newChore.title,
 		description: newChore.description,
-		createdAt: new Date(newChore.created_at as number).toISOString(),
+		created_at: new Date(newChore.created_at as number).toISOString(),
 		frequency: newChore.frequency,
-		nextDueDate: new Date(newChore.next_due_date as number).toISOString(),
+		next_due_date: new Date(newChore.next_due_date as number).toISOString(),
 		difficulty: newChore.difficulty,
-		reservedBy: null,
-		reservedUntil: null,
-		isPrivate: newChore.is_private === 1,
+		reserved_by: null,
+		reserved_until: null,
+		is_private: newChore.is_private === 1,
 	};
 };
 
-export const getUserChores = (userId: string): Array<Chore> => {
+export const getUserChores = (userId: string): Array<ChoreSchema> => {
 	const chores = getChoresByUserId.all(userId);
 
 	if (!chores || chores.length === 0) return [];
@@ -113,13 +87,13 @@ export const getUserChores = (userId: string): Array<Chore> => {
 		id: chore.id,
 		title: chore.title,
 		description: chore.description,
-		createdAt: new Date(chore.created_at as number).toISOString(),
+		created_at: new Date(chore.created_at as number).toISOString(),
 		frequency: chore.frequency,
-		nextDueDate: new Date(chore.next_due_date as number).toISOString(),
+		next_due_date: new Date(chore.next_due_date as number).toISOString(),
 		difficulty: chore.difficulty,
-		reservedBy: chore.reserved_by,
-		reservedUntil: chore.reserved_until,
-		isPrivate: chore.is_private === 1,
+		reserved_by: chore.reserved_by,
+		reserved_until: chore.reserved_until,
+		is_private: chore.is_private === 1,
 	}));
 };
 
@@ -202,7 +176,7 @@ export const reserveChore = (choreId: string, userId: string) => {
 			success: false,
 			error: "Chore is already reserved",
 			reservedBy: currentReservation.reserved_by,
-			reservedUntil: new Date(currentReservation.reserved_until).toISOString(),
+			reserved_until: new Date(currentReservation.reserved_until).toISOString(),
 		};
 	}
 

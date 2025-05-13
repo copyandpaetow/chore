@@ -1,15 +1,12 @@
 import Express from "express";
+import { config } from "../config.ts";
 
-/**
- * Set a session token cookie with the appropriate security settings
- */
 export const setSessionTokenCookie = (
 	response: Express.Response,
 	token: string,
 	expiresAt: Date
 ): void => {
-	if (process.env.NODE_ENV === "production") {
-		// When deployed over HTTPS
+	if (config.isProduction) {
 		response.cookie("session", token, {
 			httpOnly: true,
 			sameSite: "lax",
@@ -18,7 +15,6 @@ export const setSessionTokenCookie = (
 			secure: true,
 		});
 	} else {
-		// When deployed over HTTP (localhost/development)
 		response.cookie("session", token, {
 			httpOnly: true,
 			sameSite: "lax",
@@ -28,12 +24,8 @@ export const setSessionTokenCookie = (
 	}
 };
 
-/**
- * Delete the session token cookie
- */
 export const deleteSessionTokenCookie = (response: Express.Response): void => {
-	if (process.env.NODE_ENV === "production") {
-		// When deployed over HTTPS
+	if (config.isProduction) {
 		response.cookie("session", "", {
 			httpOnly: true,
 			sameSite: "lax",
@@ -42,7 +34,6 @@ export const deleteSessionTokenCookie = (response: Express.Response): void => {
 			secure: true,
 		});
 	} else {
-		// When deployed over HTTP (localhost/development)
 		response.cookie("session", "", {
 			httpOnly: true,
 			sameSite: "lax",
@@ -50,4 +41,16 @@ export const deleteSessionTokenCookie = (response: Express.Response): void => {
 			path: "/",
 		});
 	}
+};
+
+export const parseCookies = (cookieHeader: string): Map<string, string> => {
+	const cookies = new Map<string, string>();
+	if (!cookieHeader) return cookies;
+
+	cookieHeader.split(";").forEach((cookie) => {
+		const [name, value] = cookie.trim().split("=");
+		if (name && value) cookies.set(name, value);
+	});
+
+	return cookies;
 };

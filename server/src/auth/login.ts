@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
-import { createUser, getUserByUsername } from "./db.ts";
 import bcrypt from "bcrypt";
+import { createUser, getUserByUsername } from "../user/queries.ts";
 
 export const signupUser = async (username: string, password: string) => {
 	const hashedPassword = await bcrypt.hash(password, 5);
