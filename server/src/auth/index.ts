@@ -31,18 +31,18 @@ export const requireAuth = async (
 	nextFunction: Express.NextFunction
 ) => {
 	// CSRF protection for non-GET requests
-	if (req.method !== "GET") {
-		const origin = req.headers.origin;
-		const allowedOrigins = [
-			"http://localhost:8080",
-			"http://raspberrypi.local:8080",
-		];
+	// if (req.method !== "GET") {
+	// 	const origin = req.headers.origin;
+	// 	const allowedOrigins = [
+	// 		"http://localhost:8080",
+	// 		"http://raspberrypi.local:8080",
+	// 	];
 
-		// Add your production domain to allowedOrigins
-		if (!origin || !allowedOrigins.includes(origin)) {
-			return res.status(403).json({ error: "Invalid origin" });
-		}
-	}
+	// 	// Add your production domain to allowedOrigins
+	// 	if (!origin || !allowedOrigins.includes(origin)) {
+	// 		return res.status(403).json({ error: "Invalid origin" });
+	// 	}
+	// }
 
 	// Get session token from cookies
 	const cookies = parseCookies(req.headers.cookie || "");
@@ -61,7 +61,6 @@ export const requireAuth = async (
 		return res.status(401).json({ error: "Unauthorized" });
 	}
 
-	console.log(result);
 	// Update the session cookie with the new expiration
 	setSessionTokenCookie(res, token, result.session.expiresAt);
 
