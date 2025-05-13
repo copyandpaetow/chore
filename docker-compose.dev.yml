@@ -10,8 +10,7 @@ services:
       - ./server/db:/app/db
     environment:
       - NODE_ENV=development
-      - DB_AUTH_PATH=/app/db/auth.db
-      - DB_USER_PATH=/app/db/user.db
+      - DB_PATH=/app/db/main.db
       - PORT=3000
 
   client:

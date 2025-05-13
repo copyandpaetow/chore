@@ -1,6 +1,6 @@
 // auth.ts - Authentication middleware
 
-import Express from "express";
+import type Express from "express";
 import { deleteSessionTokenCookie, setSessionTokenCookie } from "./cookies.ts";
 import {
 	validateSessionToken,
@@ -61,6 +61,7 @@ export const requireAuth = async (
 		return res.status(401).json({ error: "Unauthorized" });
 	}
 
+	console.log(result);
 	// Update the session cookie with the new expiration
 	setSessionTokenCookie(res, token, result.session.expiresAt);
 
@@ -69,39 +70,6 @@ export const requireAuth = async (
 	(req as any).session = result.session;
 
 	// Continue to the next middleware or route handler
-	nextFunction();
-};
-
-/**
- * Optional auth middleware - doesn't require authentication but attaches user if present
- */
-export const optionalAuth = async (
-	req: Express.Request,
-	res: Express.Response,
-	nextFunction: Express.NextFunction
-) => {
-	// Get session token from cookies
-	const cookies = parseCookies(req.headers.cookie || "");
-	const token = cookies.get("session");
-
-	if (token) {
-		// Validate the session token
-		const result: SessionValidationResult = await validateSessionToken(token);
-
-		if (result.session !== null) {
-			// Update the session cookie with the new expiration
-			setSessionTokenCookie(res, token, result.session.expiresAt);
-
-			// Add user and session to the request object
-			(req as any).user = result.user;
-			(req as any).session = result.session;
-		} else {
-			// Invalid session, clear the cookie
-			deleteSessionTokenCookie(res);
-		}
-	}
-
-	// Always continue to the next middleware
 	nextFunction();
 };
 

@@ -1,21 +1,9 @@
-import express from "express";
 import cors from "cors";
-import {
-	requireAuth,
-	optionalAuth,
-	getCurrentUser,
-	getCurrentSession,
-} from "./auth/index.ts";
-import {
-	createSession,
-	generateSessionToken,
-	invalidateSession,
-} from "./auth/sessions.ts";
-import {
-	deleteSessionTokenCookie,
-	setSessionTokenCookie,
-} from "./auth/cookies.ts";
-import { getLoginCredentials, signupUser } from "./user/login.ts";
+import express from "express";
+import { setSessionTokenCookie } from "./auth/cookies.ts";
+import { getCurrentUser, requireAuth } from "./auth/index.ts";
+import { getLoginCredentials, signupUser } from "./auth/login.ts";
+import { createSession, generateSessionToken } from "./auth/sessions.ts";
 
 const app = express();
 app.use(
@@ -65,10 +53,9 @@ app.post("/api/login", async (req: express.Request, res: express.Response) => {
 		return res.status(401).json({ error: "Invalid credentials" });
 	}
 
-	console.log("here", user);
 	// Generate a session token and create a session
 	const token = generateSessionToken();
-	const session = createSession(token, user.user_id);
+	const session = createSession(token, user.id);
 
 	// Set the session cookie
 	setSessionTokenCookie(res, token, session.expiresAt);
@@ -76,29 +63,12 @@ app.post("/api/login", async (req: express.Request, res: express.Response) => {
 	// Return success response
 	res.json({
 		success: true,
-		user: { id: user.user_id },
+		user: { id: user.id },
 	});
 });
 
-// Logout route
-app.post("/api/logout", optionalAuth, (req, res) => {
-	const session = getCurrentSession(req);
-
-	if (session) {
-		// Invalidate the session
-		invalidateSession(session.id);
-
-		// Clear the session cookie
-		deleteSessionTokenCookie(res);
-	}
-
-	res.json({ success: true });
-});
-
-// --- Protected routes (require authentication) ---
-
 // Example protected resource
-app.get("/api/protected-data", requireAuth, (req, res) => {
+app.get("/api/test", requireAuth, (req, res) => {
 	// Access is granted because requireAuth passed
 	res.json({
 		message: "This is protected data",

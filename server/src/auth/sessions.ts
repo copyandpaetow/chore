@@ -3,7 +3,13 @@ import {
 	encodeBase32LowerCaseNoPadding,
 	encodeHexLowerCase,
 } from "@oslojs/encoding";
-import { addSession, deleteSession, getSession, updateSession } from "./db.ts";
+import {
+	addSession,
+	deleteSession,
+	getSession,
+	getUserById,
+	updateSession,
+} from "./db.ts";
 
 export type SessionValidationResult =
 	| { session: Session; user: User }
@@ -47,19 +53,25 @@ export const validateSessionToken = (
 ): SessionValidationResult => {
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
 	const row = getSession.get(sessionId);
-	console.log(row);
 
 	if (row === null) {
 		return { session: null, user: null };
 	}
 	const session: Session = {
-		id: row[0],
-		user_id: row[1],
-		expiresAt: new Date(row[2] * 1000),
+		id: row.session_id,
+		user_id: row.user_id,
+		expiresAt: new Date(row.expires_at * 1000),
 	};
-	const user: User = {
-		id: row[3],
-	};
+
+	const currentUser = getUserById.get(row.user_id);
+
+	if (!currentUser) {
+		deleteSession.run(session.id);
+		return { session: null, user: null };
+	}
+
+	console.log({ currentUser, session });
+
 	if (Date.now() >= session.expiresAt.getTime()) {
 		deleteSession.run(session.id);
 		return { session: null, user: null };
@@ -71,7 +83,7 @@ export const validateSessionToken = (
 			session.id
 		);
 	}
-	return { session, user };
+	return { session, user: currentUser };
 };
 
 export const invalidateSession = (sessionId: string): void => {

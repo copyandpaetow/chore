@@ -11,10 +11,13 @@ export const signupUser = async (username: string, password: string) => {
 	if (recordedUser) return false;
 
 	const newUser = createUser.get(userId, username, hashedPassword, Date.now());
+
+	if (!newUser) return false;
+
 	return {
-		userId: newUser.user_id,
-		username: newUser.username,
-		joined: new Date(newUser.created_at).toISOString(),
+		id: newUser.id,
+		name: newUser.name,
+		joined: new Date(newUser.created_at as string).toISOString(),
 	};
 };
 
@@ -29,7 +32,7 @@ export const getLoginCredentials = async (
 	// Check for password
 	const isCorrectPassword = await bcrypt.compare(
 		password,
-		registeredUser.password
+		registeredUser!.password as string
 	);
 	if (!isCorrectPassword) {
 		return false;

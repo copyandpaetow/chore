@@ -20,3 +20,5 @@ document.getElementById("login")?.addEventListener("submit", async (e) => {
 		console.error("Login error:", error);
 	}
 });
+
+document.getElementById("test")?.addEventListener("click", () => {});
