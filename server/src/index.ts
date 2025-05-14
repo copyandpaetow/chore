@@ -1,13 +1,25 @@
 import cors from "cors";
 import express from "express";
-import { authRouter } from "./auth/router.ts";
-import { choreRouter } from "./chores/router.ts";
-import { initializeSchema } from "./db/index.ts";
+import { createChoreQueries } from "./chores/queries.ts";
+import { createChoreRouter } from "./chores/router.ts";
 import { config } from "./config.ts";
+import { initializeSchema } from "./db/index.ts";
+import { createSessionQueries } from "./auth/queries.ts";
+import { createUserQueries } from "./user/queries.ts";
+import { createAuthRouter } from "./auth/router.ts";
+import { createAuthMiddleware } from "./auth/middleware.ts";
 
 try {
 	console.log("Initializing database schema...");
-	initializeSchema();
+	const database = initializeSchema();
+	const userQueries = createUserQueries(database);
+	const sessionQueries = createSessionQueries(database);
+	const choreQueries = createChoreQueries(database);
+
+	const authMiddleWare = createAuthMiddleware(userQueries, sessionQueries);
+
+	const authRouter = createAuthRouter(userQueries, sessionQueries);
+	const choreRouter = createChoreRouter(choreQueries, authMiddleWare);
 
 	const app = express();
 	app.use(
@@ -23,6 +35,7 @@ try {
 		})
 	);
 	app.use(express.json());
+
 	app.use("/auth", authRouter);
 	app.use("/chore", choreRouter);
 

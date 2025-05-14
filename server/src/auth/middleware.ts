@@ -6,48 +6,53 @@ import {
 	parseCookies,
 	setSessionTokenCookie,
 } from "./cookies.ts";
-import {
-	validateSessionToken,
-	type SessionValidationResult,
-} from "./sessions.ts";
+import { validateSessionToken } from "./sessions.ts";
+import { UserQueries } from "../user/queries.ts";
+import { SessionQueries } from "./queries.ts";
 
-export const requireAuth = async (
-	req: Express.Request,
-	res: Express.Response,
-	nextFunction: Express.NextFunction
-) => {
-	// CSRF protection for non-GET requests
-	// if (req.method !== "GET") {
-	// 	const origin = req.headers.origin;
-	// 	const allowedOrigins = [
-	// 		"http://localhost:8080",
-	// 		"http://raspberrypi.local:8080",
-	// 	];
+export const createAuthMiddleware =
+	(userQueries: UserQueries, sessionQueries: SessionQueries) =>
+	async (
+		req: Express.Request,
+		res: Express.Response,
+		nextFunction: Express.NextFunction
+	): Promise<void> => {
+		// CSRF protection for non-GET requests
+		// if (req.method !== "GET") {
+		// 	const origin = req.headers.origin;
+		// 	const allowedOrigins = [
+		// 		"http://localhost:8080",
+		// 		"http://raspberrypi.local:8080",
+		// 	];
 
-	// 	// Add your production domain to allowedOrigins
-	// 	if (!origin || !allowedOrigins.includes(origin)) {
-	// 		return res.status(403).json({ error: "Invalid origin" });
-	// 	}
-	// }
+		// 	// Add your production domain to allowedOrigins
+		// 	if (!origin || !allowedOrigins.includes(origin)) {
+		// 		return res.status(403).json({ error: "Invalid origin" });
+		// 	}
+		// }
 
-	const cookies = parseCookies(req.headers.cookie || "");
-	const token = cookies.get("session");
+		try {
+			const cookies = parseCookies(req.headers.cookie || "");
+			const token = cookies.get("session");
 
-	if (!token) {
-		return res.status(401).json({ error: "Unauthorized" });
-	}
+			if (!token) {
+				throw new Error("Unauthorized");
+			}
 
-	const result: SessionValidationResult = await validateSessionToken(token);
+			const result = await validateSessionToken(
+				token,
+				userQueries,
+				sessionQueries
+			);
 
-	if (result.session === null) {
-		deleteSessionTokenCookie(res);
-		return res.status(401).json({ error: "Unauthorized" });
-	}
+			setSessionTokenCookie(res, token, result.session.expires_at);
 
-	setSessionTokenCookie(res, token, result.session.expires_at);
+			(req as any).user = result.user;
+			(req as any).session = result.session;
 
-	(req as any).user = result.user;
-	(req as any).session = result.session;
-
-	return nextFunction();
-};
+			nextFunction();
+		} catch (error) {
+			deleteSessionTokenCookie(res);
+			res.status(401).json({ error });
+		}
+	};

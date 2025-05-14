@@ -1,33 +1,44 @@
 import { randomUUID } from "crypto";
 import bcrypt from "bcrypt";
-import { createUser, getUserByUsername } from "../user/queries.ts";
+import { UserQueries } from "../user/queries.ts";
 
-export const signupUser = async (username: string, password: string) => {
+export const signupUser = async (
+	username: string,
+	password: string,
+	userQueries: UserQueries
+) => {
 	const hashedPassword = await bcrypt.hash(password, 5);
 	const userId = randomUUID();
 
-	const recordedUser = getUserByUsername.get(username);
+	const recordedUser = userQueries.getByName(username);
 
-	if (recordedUser) return false;
+	if (recordedUser) {
+		throw new Error("user already exsists");
+	}
 
-	const newUser = createUser.get(userId, username, hashedPassword, Date.now());
+	const newUser = userQueries.create(
+		userId,
+		username,
+		hashedPassword,
+		Date.now()
+	);
 
-	if (!newUser) return false;
-
-	return {
-		id: newUser.id,
-		name: newUser.name,
-		joined: new Date(newUser.created_at as string).toISOString(),
-	};
+	if (!newUser) {
+		throw new Error("error creating user");
+	}
+	return newUser;
 };
 
 export const getLoginCredentials = async (
 	username: string,
-	password: string
+	password: string,
+	userQueries: UserQueries
 ) => {
-	const registeredUser = getUserByUsername.get(username);
+	const registeredUser = userQueries.getByName(username);
 
-	if (!registeredUser) false;
+	if (!registeredUser) {
+		throw new Error("user or password incorrect");
+	}
 
 	// Check for password
 	const isCorrectPassword = await bcrypt.compare(
@@ -35,7 +46,7 @@ export const getLoginCredentials = async (
 		registeredUser!.password as string
 	);
 	if (!isCorrectPassword) {
-		return false;
+		throw new Error("user or password incorrect");
 	}
 
 	return registeredUser;

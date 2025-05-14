@@ -1,7 +1,7 @@
-export type SessionSchema = {
+export type Session = {
 	id: string;
 	user_id: string;
-	expires_at: string;
+	expires_at: number;
 };
 
 export const sessionSchema = `

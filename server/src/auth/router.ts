@@ -2,54 +2,69 @@ import express from "express";
 import { setSessionTokenCookie } from "./cookies.ts";
 import { signupUser, getLoginCredentials } from "./login.ts";
 import { generateSessionToken, createSession } from "./sessions.ts";
+import { UserQueries } from "../user/queries.ts";
+import { SessionQueries } from "./queries.ts";
 
-export const authRouter = express.Router();
+export const createAuthRouter = (
+	userQueries: UserQueries,
+	sessionQueries: SessionQueries
+) => {
+	const authRouter = express.Router();
+	authRouter.post(
+		"/signup",
+		async (req: express.Request, res: express.Response) => {
+			try {
+				const { username, password } = req.body;
 
-authRouter.post(
-	"/signup",
-	async (req: express.Request, res: express.Response) => {
-		const { username, password } = req.body;
+				if (!username || !password) {
+					throw new Error("missing fields");
+				}
 
-		if (!username || !password) {
-			return res.status(400).json({ error: "Missing required property" });
+				const user = await signupUser(username, password, userQueries);
+				res.json({
+					success: true,
+					username: user.name,
+				});
+			} catch (error) {
+				res.status(401).json({
+					success: false,
+					error,
+				});
+			}
 		}
+	);
 
-		const user = await signupUser(username, password);
-		console.log({ username, password, user });
+	authRouter.post(
+		"/login",
+		async (req: express.Request, res: express.Response) => {
+			try {
+				const { username, password } = req.body;
 
-		res.json({
-			success: true,
-			user,
-		});
-	}
-);
+				if (!username || !password) {
+					throw new Error("missing fields");
+				}
 
-authRouter.post(
-	"/login",
-	async (req: express.Request, res: express.Response) => {
-		const { username, password } = req.body;
+				const user = await getLoginCredentials(username, password, userQueries);
 
-		if (!username || !password) {
-			return res.status(400).json({ error: "Missing required property" });
+				if (!user) {
+					throw new Error("Invalid credentials");
+				}
+				const token = generateSessionToken();
+				const session = createSession(token, user.id, sessionQueries);
+				setSessionTokenCookie(res, token, session.expires_at);
+
+				res.json({
+					success: true,
+					username: user.name,
+				});
+			} catch (error) {
+				res.status(401).json({
+					success: false,
+					error,
+				});
+			}
 		}
+	);
 
-		const user = await getLoginCredentials(username, password);
-
-		if (!user) {
-			return res.status(401).json({ error: "Invalid credentials" });
-		}
-
-		// Generate a session token and create a session
-		const token = generateSessionToken();
-		const session = createSession(token, user.id);
-
-		// Set the session cookie
-		setSessionTokenCookie(res, token, session.expiresAt);
-
-		// Return success response
-		res.json({
-			success: true,
-			user: { id: user.id },
-		});
-	}
-);
+	return authRouter;
+};

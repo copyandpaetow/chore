@@ -8,7 +8,7 @@ export { choreSchema, sessionSchema, userSchema };
 
 const dbPath =
 	process.env.DB_PATH || path.resolve(process.cwd(), "db", "main.db");
-export const database = new DatabaseSync(dbPath);
+const database = new DatabaseSync(dbPath);
 
 export const initializeSchema = () => {
 	try {
@@ -20,6 +20,7 @@ export const initializeSchema = () => {
 
 		database.exec(choreSchema);
 		console.log("Chore schema initialized");
+		return database;
 	} catch (error) {
 		console.error("Failed to initialize schema:", error);
 		throw error;

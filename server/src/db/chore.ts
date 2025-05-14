@@ -1,22 +1,24 @@
 export type Difficulty = 1 | 2 | 3 | 4 | 5;
 
-export type ChoreSchema = {
+export type Frequency = "weekly" | "monthly" | "quarterly";
+
+export type Chore = {
 	id: string;
 	title: string;
 	description: string;
-	created_at: string;
-	frequency: string;
-	next_due_date: string;
+	created_at: number;
+	frequency: Frequency;
+	next_due_date: number;
 	difficulty: Difficulty;
 	reserved_by: string | null;
-	reserved_until: string | null;
-	is_private: boolean;
+	reserved_until: number | null;
+	is_private: 1 | 0;
 };
 
 export type ChoreCompletion = {
 	id: string;
 	chore_id: string;
-	completed_by: string;
+	completed_by: number;
 	completed_at: number;
 };
 

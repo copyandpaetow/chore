@@ -4,13 +4,13 @@ import { config } from "../config.ts";
 export const setSessionTokenCookie = (
 	response: Express.Response,
 	token: string,
-	expiresAt: Date
+	expiresAt: number
 ): void => {
 	if (config.isProduction) {
 		response.cookie("session", token, {
 			httpOnly: true,
 			sameSite: "lax",
-			expires: expiresAt,
+			expires: new Date(expiresAt),
 			path: "/",
 			secure: true,
 		});
@@ -18,7 +18,7 @@ export const setSessionTokenCookie = (
 		response.cookie("session", token, {
 			httpOnly: true,
 			sameSite: "lax",
-			expires: expiresAt,
+			expires: new Date(expiresAt),
 			path: "/",
 		});
 	}

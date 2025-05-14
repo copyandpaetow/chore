@@ -1,8 +1,8 @@
-export type UserSchema = {
+export type User = {
 	id: string;
 	name: string;
 	password: string;
-	created_at: string;
+	created_at: number;
 };
 
 export const userSchema = `
