@@ -37,7 +37,7 @@ try {
 	app.use(express.json());
 
 	app.use("/auth", authRouter);
-	app.use("/chore", choreRouter);
+	app.use("/chores", choreRouter);
 
 	app.listen(config.port, () => {
 		console.log(`Server running on port ${config.port}`);

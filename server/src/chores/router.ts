@@ -14,7 +14,7 @@ export const createChoreRouter = (
 ) => {
 	const choreRouter = express.Router();
 	choreRouter.get(
-		"/chores",
+		"/all",
 		requireAuth,
 		(req: express.Request, res: express.Response) => {
 			const user = getCurrentUser(req)!;
@@ -28,7 +28,7 @@ export const createChoreRouter = (
 	);
 
 	choreRouter.post(
-		"/chore",
+		"/create",
 		requireAuth,
 		(req: express.Request, res: express.Response) => {
 			const { title, frequency } = req.body;
