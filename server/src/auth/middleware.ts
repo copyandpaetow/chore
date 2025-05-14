@@ -7,8 +7,8 @@ import {
 	setSessionTokenCookie,
 } from "./cookies.ts";
 import { validateSessionToken } from "./sessions.ts";
-import { UserQueries } from "../user/queries.ts";
-import { SessionQueries } from "./queries.ts";
+import { type UserQueries } from "../user/queries.ts";
+import { type SessionQueries } from "./queries.ts";
 
 export const createAuthMiddleware =
 	(userQueries: UserQueries, sessionQueries: SessionQueries) =>

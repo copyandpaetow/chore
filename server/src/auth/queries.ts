@@ -1,5 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
-import { Session } from "../db/session.ts";
+import { type Session } from "../db/session.ts";
 
 export type SessionQueries = {
 	get(id: string): Session | undefined;

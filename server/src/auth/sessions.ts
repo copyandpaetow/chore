@@ -3,9 +3,9 @@ import {
 	encodeBase32LowerCaseNoPadding,
 	encodeHexLowerCase,
 } from "@oslojs/encoding";
-import { SessionQueries } from "./queries.ts";
+import { type SessionQueries } from "./queries.ts";
 import { type Session } from "../db/session.ts";
-import { UserQueries } from "../user/queries.ts";
+import { type UserQueries } from "../user/queries.ts";
 
 export const generateSessionToken = (): string => {
 	const bytes = new Uint8Array(20);

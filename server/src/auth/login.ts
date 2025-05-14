@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import bcrypt from "bcrypt";
-import { UserQueries } from "../user/queries.ts";
+import { type UserQueries } from "../user/queries.ts";
 
 export const signupUser = async (
 	username: string,

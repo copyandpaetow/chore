@@ -2,8 +2,8 @@ import express from "express";
 import { setSessionTokenCookie } from "./cookies.ts";
 import { signupUser, getLoginCredentials } from "./login.ts";
 import { generateSessionToken, createSession } from "./sessions.ts";
-import { UserQueries } from "../user/queries.ts";
-import { SessionQueries } from "./queries.ts";
+import { type UserQueries } from "../user/queries.ts";
+import { type SessionQueries } from "./queries.ts";
 
 export const createAuthRouter = (
 	userQueries: UserQueries,

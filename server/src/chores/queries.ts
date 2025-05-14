@@ -1,5 +1,10 @@
 import { DatabaseSync } from "node:sqlite";
-import { Difficulty, Frequency, Chore, ChoreCompletion } from "../db/chore.ts";
+import {
+	type Difficulty,
+	type Frequency,
+	type Chore,
+	type ChoreCompletion,
+} from "../db/chore.ts";
 
 export type ChoreCompletionQueries = {
 	complete(

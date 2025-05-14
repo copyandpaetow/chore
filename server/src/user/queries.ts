@@ -1,5 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
-import { User } from "../db/user.ts";
+import { type User } from "../db/user.ts";
 
 export type UserQueries = {
 	create(

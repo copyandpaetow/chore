@@ -1,7 +1,7 @@
 import express from "express";
 import { calculateNextDueDate, completeChore, reserveChore } from "./chores.ts";
 import { getCurrentUser } from "../user/helper.ts";
-import { ChoreQueries } from "./queries.ts";
+import { type ChoreQueries } from "./queries.ts";
 import { randomUUID } from "crypto";
 
 export const createChoreRouter = (

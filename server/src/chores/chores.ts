@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { ChoreQueries } from "./queries.ts";
+import { type ChoreQueries } from "./queries.ts";
 
 export const calculateNextDueDate = (
 	frequency: string,
