@@ -8,6 +8,7 @@ import { createSessionQueries } from "./auth/queries.ts";
 import { createUserQueries } from "./user/queries.ts";
 import { createAuthRouter } from "./auth/router.ts";
 import { createAuthMiddleware } from "./auth/middleware.ts";
+import path from "path";
 
 try {
 	console.log("Initializing database schema...");
@@ -35,9 +36,12 @@ try {
 		})
 	);
 	app.use(express.json());
+	app.use(express.urlencoded({ extended: true }));
 
-	app.use("/auth", authRouter);
-	app.use("/chores", choreRouter);
+	app.use("/", authRouter);
+	app.use("/", choreRouter);
+
+	app.use(express.static(path.resolve(process.cwd(), "src/templates/public")));
 
 	app.listen(config.port, () => {
 		console.log(`Server running on port ${config.port}`);

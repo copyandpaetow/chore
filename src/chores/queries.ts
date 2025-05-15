@@ -107,7 +107,7 @@ export type ChoreQueries = {
 		is_private: 0 | 1
 	): Chore | undefined;
 	getById(id: string): Chore | undefined;
-	getAllByUserId(userId: string): Chore[] | undefined;
+	getAllByUserId(userId: string): Chore[];
 	updateNextDueDate(nextDueDate: number, id: string): Chore | undefined;
 	delete(id: string, ownerId: string): void;
 	reserve(
@@ -224,7 +224,7 @@ export const createChoreQueries = (database: DatabaseSync): ChoreQueries => {
 			}
 
 			try {
-				return getChoresByUserId.all(userId) as Array<Chore> | undefined;
+				return (getChoresByUserId.all(userId) ?? []) as Array<Chore>;
 			} catch (error) {
 				console.error("Database error:", error);
 				throw new Error("Failed to get chores by user ID");

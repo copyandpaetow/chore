@@ -3,6 +3,7 @@ import { calculateNextDueDate, completeChore, reserveChore } from "./chores.ts";
 import { getCurrentUser } from "../user/helper.ts";
 import { type ChoreQueries } from "./queries.ts";
 import { randomUUID } from "crypto";
+import { renderChores } from "./view.ts";
 
 export const createChoreRouter = (
 	choreQueries: ChoreQueries,
@@ -13,17 +14,16 @@ export const createChoreRouter = (
 	) => Promise<void>
 ) => {
 	const choreRouter = express.Router();
+
 	choreRouter.get(
-		"/all",
+		"/",
 		requireAuth,
-		(req: express.Request, res: express.Response) => {
+		async (req: express.Request, res: express.Response) => {
 			const user = getCurrentUser(req)!;
 			const chores = choreQueries.getAllByUserId(user.id);
-
-			res.json({
-				success: true,
-				chores,
-			});
+			const template = await renderChores(chores);
+			console.log(template);
+			res.send(template);
 		}
 	);
 

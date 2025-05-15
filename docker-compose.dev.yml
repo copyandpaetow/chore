@@ -1,26 +1,14 @@
 services:
-  server:
+  app:
     image: node:24-alpine
     working_dir: /app
     command: sh -c "npm install && npm run dev"
     ports:
       - "3000:3000"
     volumes:
-      - ./server:/app
-      - ./server/db:/app/db
+      - ./:/app
+      - ./db:/app/db
     environment:
       - NODE_ENV=development
       - DB_PATH=/app/db/main.db
       - PORT=3000
-
-  client:
-    image: node:24-alpine
-    working_dir: /app
-    command: sh -c "npm install && npm run dev"
-    ports:
-      - "5173:5173"
-    volumes:
-      - ./client:/app
-    environment:
-      - NODE_ENV=development
-      - VITE_API_URL=http://localhost:3000

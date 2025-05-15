@@ -9,6 +9,7 @@ import {
 import { validateSessionToken } from "./sessions.ts";
 import { type UserQueries } from "../user/queries.ts";
 import { type SessionQueries } from "./queries.ts";
+import { config } from "../config.ts";
 
 export const createAuthMiddleware =
 	(userQueries: UserQueries, sessionQueries: SessionQueries) =>
@@ -18,25 +19,25 @@ export const createAuthMiddleware =
 		nextFunction: Express.NextFunction
 	): Promise<void> => {
 		// CSRF protection for non-GET requests
-		// if (req.method !== "GET") {
-		// 	const origin = req.headers.origin;
-		// 	const allowedOrigins = [
-		// 		"http://localhost:8080",
-		// 		"http://raspberrypi.local:8080",
-		// 	];
+		if (req.method !== "GET" && config.isProduction) {
+			const origin = req.headers.origin;
+			const allowedOrigins = [
+				"http://localhost:8080",
+				"http://raspberrypi.local:8080",
+			];
 
-		// 	// Add your production domain to allowedOrigins
-		// 	if (!origin || !allowedOrigins.includes(origin)) {
-		// 		return res.status(403).json({ error: "Invalid origin" });
-		// 	}
-		// }
+			if (!origin || !allowedOrigins.includes(origin)) {
+				res.status(403).json({ error: "Invalid origin" });
+			}
+		}
 
 		try {
 			const cookies = parseCookies(req.headers.cookie || "");
 			const token = cookies.get("session");
 
 			if (!token) {
-				throw new Error("Unauthorized");
+				res.redirect("/login");
+				return;
 			}
 
 			const result = await validateSessionToken(
@@ -53,6 +54,6 @@ export const createAuthMiddleware =
 			nextFunction();
 		} catch (error) {
 			deleteSessionTokenCookie(res);
-			res.status(401).json({ error });
+			res.redirect("/login");
 		}
 	};

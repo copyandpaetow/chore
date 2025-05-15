@@ -4,6 +4,7 @@ import { signupUser, getLoginCredentials } from "./login.ts";
 import { generateSessionToken, createSession } from "./sessions.ts";
 import { type UserQueries } from "../user/queries.ts";
 import { type SessionQueries } from "./queries.ts";
+import { renderLogin } from "./view.ts";
 
 export const createAuthRouter = (
 	userQueries: UserQueries,
@@ -20,11 +21,9 @@ export const createAuthRouter = (
 					throw new Error("missing fields");
 				}
 
-				const user = await signupUser(username, password, userQueries);
-				res.json({
-					success: true,
-					username: user.name,
-				});
+				await signupUser(username, password, userQueries);
+
+				return res.redirect("/");
 			} catch (error) {
 				res.status(401).json({
 					success: false,
@@ -39,6 +38,7 @@ export const createAuthRouter = (
 		async (req: express.Request, res: express.Response) => {
 			try {
 				const { username, password } = req.body;
+				console.log({ username, password });
 
 				if (!username || !password) {
 					throw new Error("missing fields");
@@ -53,16 +53,22 @@ export const createAuthRouter = (
 				const session = createSession(token, user.id, sessionQueries);
 				setSessionTokenCookie(res, token, session.expires_at);
 
-				res.json({
-					success: true,
-					username: user.name,
-				});
+				return res.redirect("/");
 			} catch (error) {
 				res.status(401).json({
 					success: false,
 					error,
 				});
 			}
+		}
+	);
+
+	authRouter.get(
+		"/login",
+		async (req: express.Request, res: express.Response) => {
+			const template = await renderLogin();
+
+			res.send(template);
 		}
 	);
 

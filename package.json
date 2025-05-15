@@ -1,10 +1,29 @@
 {
 	"name": "chore",
+	"private": true,
 	"version": "0.0.1",
-	"license": "MIT",
-	"scripts": {},
-	"workspaces": [
-		"/lib",
-		"/client"
-	]
+	"type": "module",
+	"scripts": {
+		"build": "npm run build:client && npm run build:server",
+		"dev": "npm run watch:client & npm run watch:server & wait",
+		"watch:server": "node --experimental-sqlite --watch src/index.ts",
+		"build:server": "node --experimental-sqlite src/index.ts",
+		"watch:client": "tsc -p tsconfig.client.json --watch",
+		"build:client": "tsc -p tsconfig.client.json"
+	},
+	"devDependencies": {
+		"@types/bcrypt": "^5.0.2",
+		"@types/cors": "^2.8.18",
+		"@types/express": "^5.0.1",
+		"@types/node": "^22.15.17",
+		"typescript": "^5.8.3"
+	},
+	"dependencies": {
+		"@oslojs/crypto": "^1.0.1",
+		"@oslojs/encoding": "^1.1.0",
+		"bcrypt": "^6.0.0",
+		"cors": "^2.8.5",
+		"express": "^5.1.0",
+		"happy-dom": "^17.4.6"
+	}
 }
