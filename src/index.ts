@@ -1,14 +1,14 @@
 import cors from "cors";
 import express from "express";
-import { createChoreQueries } from "./chores/queries.ts";
-import { createChoreRouter } from "./chores/router.ts";
-import { config } from "./config.ts";
-import { initializeSchema } from "./db/index.ts";
-import { createSessionQueries } from "./auth/queries.ts";
-import { createUserQueries } from "./user/queries.ts";
-import { createAuthRouter } from "./auth/router.ts";
-import { createAuthMiddleware } from "./auth/middleware.ts";
+import { createChoreQueries } from "./services/chores/queries.ts";
+import { createChoreRouter } from "./services/chores/router.ts";
 import path from "path";
+import { config } from "./config.ts";
+import { createAuthMiddleware } from "./services/auth/middleware.ts";
+import { createSessionQueries } from "./services/auth/queries.ts";
+import { createAuthRouter } from "./services/auth/router.ts";
+import { initializeSchema } from "./services/db/index.ts";
+import { createUserQueries } from "./services/user/queries.ts";
 
 try {
 	console.log("Initializing database schema...");
@@ -25,11 +25,7 @@ try {
 	const app = express();
 	app.use(
 		cors({
-			origin: [
-				"http://localhost:5173",
-				"http://localhost:8080",
-				"http://raspberrypi.local:8080",
-			],
+			origin: ["http://localhost:3000", "http://raspberrypi.local:3000"],
 			credentials: true,
 			methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 			allowedHeaders: ["Content-Type", "Authorization"],

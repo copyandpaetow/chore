@@ -9,7 +9,7 @@ import {
 import { validateSessionToken } from "./sessions.ts";
 import { type UserQueries } from "../user/queries.ts";
 import { type SessionQueries } from "./queries.ts";
-import { config } from "../config.ts";
+import { config } from "../../config.ts";
 
 export const createAuthMiddleware =
 	(userQueries: UserQueries, sessionQueries: SessionQueries) =>

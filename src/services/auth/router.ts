@@ -4,7 +4,7 @@ import { signupUser, getLoginCredentials } from "./login.ts";
 import { generateSessionToken, createSession } from "./sessions.ts";
 import { type UserQueries } from "../user/queries.ts";
 import { type SessionQueries } from "./queries.ts";
-import { renderLogin } from "./view.ts";
+import { renderLogin } from "../../pages/login/render.ts";
 
 export const createAuthRouter = (
 	userQueries: UserQueries,

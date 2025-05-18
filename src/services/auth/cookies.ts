@@ -1,5 +1,5 @@
 import Express from "express";
-import { config } from "../config.ts";
+import { config } from "../../config.ts";
 
 export const setSessionTokenCookie = (
 	response: Express.Response,

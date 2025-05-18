@@ -3,7 +3,7 @@ import { calculateNextDueDate, completeChore, reserveChore } from "./chores.ts";
 import { getCurrentUser } from "../user/helper.ts";
 import { type ChoreQueries } from "./queries.ts";
 import { randomUUID } from "crypto";
-import { renderChores } from "./view.ts";
+import { renderChores } from "../../pages/home/render.ts";
 
 export const createChoreRouter = (
 	choreQueries: ChoreQueries,

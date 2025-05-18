@@ -14,6 +14,6 @@
 		"declaration": true,
 		"emitDeclarationOnly": true
 	},
-	"include": ["src/**/*"],
-	"exclude": ["src/templates/public/js/**/*"] // Exclude client-side TS files
+	"include": ["src/**/*", "src/config.ts", "public"],
+	"exclude": ["public/js/**/*"] // Exclude client-side TS files
 }
