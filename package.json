@@ -4,12 +4,14 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"build": "npm run build:client && npm run build:server",
-		"dev": "npm run watch:client & npm run watch:server & wait",
+		"build": "npm run build:client && npm run build:styles && npm run build:server",
+		"dev": "npm run watch:client & npm run watch:styles & npm run watch:server & wait",
 		"watch:server": "node --experimental-sqlite --watch src/index.ts",
 		"build:server": "node --experimental-sqlite src/index.ts",
 		"watch:client": "tsc -p tsconfig.client.json --watch",
-		"build:client": "tsc -p tsconfig.client.json"
+		"build:client": "tsc -p tsconfig.client.json",
+		"watch:styles": "node --watch build/transform-css.ts",
+		"build:styles": "node build/transform-css.ts"
 	},
 	"devDependencies": {
 		"@types/bcrypt": "^5.0.2",
@@ -24,6 +26,7 @@
 		"bcrypt": "^6.0.0",
 		"cors": "^2.8.5",
 		"express": "^5.1.0",
-		"happy-dom": "^17.4.6"
+		"happy-dom": "^17.4.6",
+		"lightningcss": "^1.30.1"
 	}
 }

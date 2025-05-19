@@ -1,11 +1,10 @@
 import { type Chore } from "../../services/db/chore.ts";
-import { renderHTML } from "../../shared/renderer.ts";
+import { Document } from "happy-dom";
 
-export const renderChores = async (chores: Array<Chore>) => {
-	const template = await renderHTML("home");
+export const renderChores = (template: Document, chores: Array<Chore>) => {
 	const main = template?.querySelector("main");
 
-	if (!main || !template) {
+	if (!main) {
 		throw new Error("mounting point doesnt exist");
 	}
 
@@ -29,5 +28,5 @@ export const renderChores = async (chores: Array<Chore>) => {
 	});
 
 	console.log(template.documentElement.outerHTML);
-	return template.documentElement.outerHTML;
+	return template;
 };

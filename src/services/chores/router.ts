@@ -3,7 +3,8 @@ import { calculateNextDueDate, completeChore, reserveChore } from "./chores.ts";
 import { getCurrentUser } from "../user/helper.ts";
 import { type ChoreQueries } from "./queries.ts";
 import { randomUUID } from "crypto";
-import { renderChores } from "../../pages/home/render.ts";
+import { renderChores } from "../../pages/home/transformer.ts";
+import { renderPage } from "../renderer/renderer.ts";
 
 export const createChoreRouter = (
 	choreQueries: ChoreQueries,
@@ -21,7 +22,11 @@ export const createChoreRouter = (
 		async (req: express.Request, res: express.Response) => {
 			const user = getCurrentUser(req)!;
 			const chores = choreQueries.getAllByUserId(user.id);
-			const template = await renderChores(chores);
+			const template = await renderPage(
+				"src/pages/home/index.html",
+				(template) => renderChores(template, chores)
+			);
+
 			console.log(template);
 			res.send(template);
 		}

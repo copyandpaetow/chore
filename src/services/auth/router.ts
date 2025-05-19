@@ -4,7 +4,7 @@ import { signupUser, getLoginCredentials } from "./login.ts";
 import { generateSessionToken, createSession } from "./sessions.ts";
 import { type UserQueries } from "../user/queries.ts";
 import { type SessionQueries } from "./queries.ts";
-import { renderLogin } from "../../pages/login/render.ts";
+import { renderPage } from "../renderer/renderer.ts";
 
 export const createAuthRouter = (
 	userQueries: UserQueries,
@@ -66,7 +66,7 @@ export const createAuthRouter = (
 	authRouter.get(
 		"/login",
 		async (req: express.Request, res: express.Response) => {
-			const template = await renderLogin();
+			const template = await renderPage("src/pages/login/template.html");
 
 			res.send(template);
 		}

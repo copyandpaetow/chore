@@ -33,11 +33,10 @@ try {
 	);
 	app.use(express.json());
 	app.use(express.urlencoded({ extended: true }));
+	app.use(express.static("public"));
 
 	app.use("/", authRouter);
 	app.use("/", choreRouter);
-
-	app.use(express.static(path.resolve(process.cwd(), "src/templates/public")));
 
 	app.listen(config.port, () => {
 		console.log(`Server running on port ${config.port}`);
