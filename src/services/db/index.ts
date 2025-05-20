@@ -3,6 +3,7 @@ import path from "path";
 import { choreSchema } from "./chore.ts";
 import { sessionSchema } from "./session.ts";
 import { userSchema } from "./user.ts";
+import { pushSubscriptionSchema } from "./push-subscription.ts";
 
 export { choreSchema, sessionSchema, userSchema };
 
@@ -20,6 +21,9 @@ export const initializeSchema = () => {
 
 		database.exec(choreSchema);
 		console.log("Chore schema initialized");
+
+		database.exec(pushSubscriptionSchema);
+		console.log("web push schema initialized");
 		return database;
 	} catch (error) {
 		console.error("Failed to initialize schema:", error);

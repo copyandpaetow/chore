@@ -12,6 +12,7 @@ export type Chore = {
 	difficulty: Difficulty;
 	reserved_by: string | null;
 	reserved_until: number | null;
+	owner_id: string;
 	is_private: 1 | 0;
 };
 

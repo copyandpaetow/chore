@@ -19,8 +19,6 @@ async function processCSS(
 
 		await fs.mkdir(path.dirname(destPath), { recursive: true });
 		await fs.writeFile(destPath, cssContent);
-
-		console.log(`Processed ${sourcePath} to ${destPath}`);
 	} catch (err) {
 		if (err.code === "ENOENT") {
 			console.warn(`Warning: ${sourcePath} does not exist, skipping`);
@@ -60,8 +58,33 @@ async function buildCSS() {
 	}
 }
 
+const copyFiles = async () => {
+	try {
+		const destination = path.join("public", "client");
+		const basePath = path.join("src", "client");
+
+		await fs.mkdir(destination, { recursive: true });
+		const files = await fs.readdir(basePath);
+		for (const file of files) {
+			console.log(file);
+			const sourcePath = path.join(basePath, file);
+
+			const stats = await fs.stat(sourcePath);
+
+			if (stats.isFile()) {
+				// Only copy if it's a file
+				const destPath = path.join(destination, file);
+				await fs.copyFile(sourcePath, destPath);
+			}
+		}
+	} catch (err) {
+		console.error("Error processing shared CSS:", err);
+	}
+};
+
 async function build() {
 	await buildCSS();
+	await copyFiles();
 	console.log("CSS build completed!");
 }
 

@@ -38,7 +38,6 @@ export const createAuthRouter = (
 		async (req: express.Request, res: express.Response) => {
 			try {
 				const { username, password } = req.body;
-				console.log({ username, password });
 
 				if (!username || !password) {
 					throw new Error("missing fields");

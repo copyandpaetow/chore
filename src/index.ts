@@ -9,18 +9,26 @@ import { createSessionQueries } from "./services/auth/queries.ts";
 import { createAuthRouter } from "./services/auth/router.ts";
 import { initializeSchema } from "./services/db/index.ts";
 import { createUserQueries } from "./services/user/queries.ts";
+import { createPushRouter } from "./services/push/router.ts";
+import { createPushQueries } from "./services/push/queries.ts";
 
 try {
 	console.log("Initializing database schema...");
 	const database = initializeSchema();
 	const userQueries = createUserQueries(database);
 	const sessionQueries = createSessionQueries(database);
+	const pushQueries = createPushQueries(database);
 	const choreQueries = createChoreQueries(database);
 
 	const authMiddleWare = createAuthMiddleware(userQueries, sessionQueries);
 
 	const authRouter = createAuthRouter(userQueries, sessionQueries);
-	const choreRouter = createChoreRouter(choreQueries, authMiddleWare);
+	const pushRouter = createPushRouter(pushQueries, authMiddleWare);
+	const choreRouter = createChoreRouter(
+		choreQueries,
+		pushQueries,
+		authMiddleWare
+	);
 
 	const app = express();
 	app.use(
@@ -36,6 +44,7 @@ try {
 	app.use(express.static("public"));
 
 	app.use("/", authRouter);
+	app.use("/", pushRouter);
 	app.use("/", choreRouter);
 
 	app.listen(config.port, () => {

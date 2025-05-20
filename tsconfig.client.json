@@ -6,6 +6,8 @@
 		"outDir": "./public",
 		"rootDir": "./src",
 		"sourceMap": true,
+		"inlineSources": true,
+		"sourceRoot": "/",
 		"lib": ["DOM", "ES2020"],
 		"strict": true,
 		"esModuleInterop": true,

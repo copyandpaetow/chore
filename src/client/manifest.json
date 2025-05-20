@@ -1,0 +1,32 @@
+{
+	"name": "Chores App",
+	"short_name": "Chores",
+	"description": "Manage household chores and tasks",
+	"start_url": "/",
+	"display": "standalone",
+	"background_color": "#ffffff",
+	"theme_color": "#4caf50",
+	"icons": [
+		{
+			"src": "/icon.png",
+			"sizes": "512x512",
+			"type": "image/png"
+		}
+	],
+	"shortcuts": [
+		{
+			"name": "Add Chore",
+			"short_name": "Add",
+			"description": "Create a new chore",
+			"url": "/chores/new",
+			"icons": [{ "src": "/icon.png", "sizes": "96x96" }]
+		},
+		{
+			"name": "Due Today",
+			"short_name": "Today",
+			"description": "View chores due today",
+			"url": "/chores?filter=today",
+			"icons": [{ "src": "/icon.png", "sizes": "96x96" }]
+		}
+	]
+}
