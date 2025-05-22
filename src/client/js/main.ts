@@ -17,32 +17,33 @@ console.log("main");
 // }
 
 // // In your main client JavaScript file (e.g., main.js)
+const SERVICE_WORKER_PATH = "/js/service-worker.js";
 
-// // Initialize the PWA functionality
-// async function initializePWA() {
-// 	// Check if service workers are supported
-// 	if ("serviceWorker" in navigator) {
-// 		try {
-// 			// Register the service worker
-// 			const registration = await navigator.serviceWorker.register(
-// 				"/service-worker.js"
-// 			);
-// 			console.log("ServiceWorker registered with scope:", registration.scope);
+// Initialize the PWA functionality
+async function initializePWA() {
+	// Check if service workers are supported
+	if ("serviceWorker" in navigator) {
+		try {
+			// Register the service worker
+			const registration = await navigator.serviceWorker.register(
+				SERVICE_WORKER_PATH
+			);
+			console.log("ServiceWorker registered with scope:", registration.scope);
 
-// 			// Initialize push notifications
-// 			await initializePushNotifications(registration);
+			// Initialize push notifications
+			// await initializePushNotifications(registration);
 
-// 			// Setup communication with the service worker
-// 			setupServiceWorkerCommunication();
-// 		} catch (error) {
-// 			console.error("ServiceWorker registration failed:", error);
-// 		}
-// 	} else {
-// 		console.log("Service workers are not supported in this browser");
-// 	}
-// }
+			// // Setup communication with the service worker
+			// setupServiceWorkerCommunication();
+		} catch (error) {
+			console.error("ServiceWorker registration failed:", error);
+		}
+	} else {
+		console.log("Service workers are not supported in this browser");
+	}
+}
 
-// initializePWA();
+initializePWA();
 
 // // Initialize push notifications
 // async function initializePushNotifications(registration) {

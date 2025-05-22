@@ -1,61 +1,61 @@
 // // service-worker.js
 
 // // Cache name for app shell (static assets)
-// const CACHE_NAME = "chores-app-v1";
+const CACHE_NAME = "chores-app-v1";
 
 // // Cache name for dynamic content (HTML responses)
-// const DYNAMIC_CACHE = "chores-dynamic-v1";
+const DYNAMIC_CACHE = "chores-dynamic-v1";
 
-// // Assets to cache on install (app shell)
-// const STATIC_ASSETS = [
-// 	"/",
-// 	"/index.html",
-// 	"/client/js/main.js",
-// 	"/client/js/service-worker.js",
-// 	"/client/css/main.css",
-// 	"/client/css/reset.css",
-// 	"/client/css/theme.css",
-// 	"/icon.png",
-// 	"/manifest.json",
-// 	// Add other static assets
-// ];
+// Assets to cache on install (app shell)
+const STATIC_ASSETS = [
+	"/",
+	"/home.html",
+	"/login.html",
+	"/js/main.js",
+	"/js/service-worker.js",
+	"/css/main.css",
+	"/icon.png",
+	"/manifest.json",
+	// Add other static assets
+];
 
-// // Install event - cache the app shell
-// self.addEventListener("install", (event) => {
-// 	event.waitUntil(
-// 		caches
-// 			.open(CACHE_NAME)
-// 			.then((cache) => {
-// 				console.log("Caching app shell");
-// 				return cache.addAll(STATIC_ASSETS);
-// 			})
-// 			.then(() => self.skipWaiting()) // Activate immediately
-// 	);
-// });
+// Install event - cache the app shell
+self.addEventListener("install", (event) => {
+	console.log("install");
+	event.waitUntil(
+		caches
+			.open(CACHE_NAME)
+			.then((cache) => {
+				console.log("Caching app shell");
+				return cache.addAll(STATIC_ASSETS);
+			})
+			.then(() => self.skipWaiting()) // Activate immediately
+	);
+});
 
 // // Activate event - clean up old caches
-// self.addEventListener("activate", (event) => {
-// 	event.waitUntil(
-// 		caches
-// 			.keys()
-// 			.then((cacheNames) => {
-// 				return Promise.all(
-// 					cacheNames
-// 						.filter((cacheName) => {
-// 							return cacheName !== CACHE_NAME && cacheName !== DYNAMIC_CACHE;
-// 						})
-// 						.map((cacheName) => {
-// 							console.log("Deleting old cache:", cacheName);
-// 							return caches.delete(cacheName);
-// 						})
-// 				);
-// 			})
-// 			.then(() => {
-// 				console.log("Service Worker activated");
-// 				return self.clients.claim(); // Take control immediately
-// 			})
-// 	);
-// });
+self.addEventListener("activate", (event) => {
+	event.waitUntil(
+		caches
+			.keys()
+			.then((cacheNames) => {
+				return Promise.all(
+					cacheNames
+						.filter((cacheName) => {
+							return cacheName !== CACHE_NAME && cacheName !== DYNAMIC_CACHE;
+						})
+						.map((cacheName) => {
+							console.log("Deleting old cache:", cacheName);
+							return caches.delete(cacheName);
+						})
+				);
+			})
+			.then(() => {
+				console.log("Service Worker activated");
+				return self.clients.claim(); // Take control immediately
+			})
+	);
+});
 
 // // Fetch event - handle network requests
 // self.addEventListener("fetch", (event) => {
