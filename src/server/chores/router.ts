@@ -3,7 +3,7 @@ import { calculateNextDueDate, completeChore, reserveChore } from "./chores.ts";
 import { getCurrentUser } from "../user/helper.ts";
 import { type ChoreQueries } from "./queries.ts";
 import { randomUUID } from "crypto";
-import { renderChores } from "../../pages/home/transformer.ts";
+import { renderChores } from "../../pages/home/template.ts";
 import { renderPage } from "../renderer/renderer.ts";
 import { type PushQueries } from "../push/queries.ts";
 import { sendNotificationToUsers } from "../push/notify-client.ts";

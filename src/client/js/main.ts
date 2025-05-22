@@ -1,238 +1,240 @@
-async function updateCacheFromCurrentDOM() {
-	// Get the current state of the page after JS modifications
-	const currentHTML = document.documentElement.outerHTML;
+console.log("main");
 
-	// Create a new response with this HTML
-	const newResponse = new Response(currentHTML, {
-		headers: {
-			"Content-Type": "text/html",
-		},
-	});
+// async function updateCacheFromCurrentDOM() {
+// 	// Get the current state of the page after JS modifications
+// 	const currentHTML = document.documentElement.outerHTML;
 
-	// Update the cache
-	const cache = await caches.open("chores-cache");
-	await cache.put("/chores", newResponse);
-}
+// 	// Create a new response with this HTML
+// 	const newResponse = new Response(currentHTML, {
+// 		headers: {
+// 			"Content-Type": "text/html",
+// 		},
+// 	});
 
-// In your main client JavaScript file (e.g., main.js)
+// 	// Update the cache
+// 	const cache = await caches.open("chores-cache");
+// 	await cache.put("/chores", newResponse);
+// }
 
-// Initialize the PWA functionality
-async function initializePWA() {
-	// Check if service workers are supported
-	if ("serviceWorker" in navigator) {
-		try {
-			// Register the service worker
-			const registration = await navigator.serviceWorker.register(
-				"/service-worker.js"
-			);
-			console.log("ServiceWorker registered with scope:", registration.scope);
+// // In your main client JavaScript file (e.g., main.js)
 
-			// Initialize push notifications
-			await initializePushNotifications(registration);
+// // Initialize the PWA functionality
+// async function initializePWA() {
+// 	// Check if service workers are supported
+// 	if ("serviceWorker" in navigator) {
+// 		try {
+// 			// Register the service worker
+// 			const registration = await navigator.serviceWorker.register(
+// 				"/service-worker.js"
+// 			);
+// 			console.log("ServiceWorker registered with scope:", registration.scope);
 
-			// Setup communication with the service worker
-			setupServiceWorkerCommunication();
-		} catch (error) {
-			console.error("ServiceWorker registration failed:", error);
-		}
-	} else {
-		console.log("Service workers are not supported in this browser");
-	}
-}
+// 			// Initialize push notifications
+// 			await initializePushNotifications(registration);
 
-initializePWA();
+// 			// Setup communication with the service worker
+// 			setupServiceWorkerCommunication();
+// 		} catch (error) {
+// 			console.error("ServiceWorker registration failed:", error);
+// 		}
+// 	} else {
+// 		console.log("Service workers are not supported in this browser");
+// 	}
+// }
 
-// Initialize push notifications
-async function initializePushNotifications(registration) {
-	try {
-		// First, check if push is supported
-		if (!("PushManager" in window)) {
-			console.log("Push notifications are not supported in this browser");
-			return;
-		}
+// initializePWA();
 
-		// Check if we already have notification permission
-		let permission = Notification.permission;
+// // Initialize push notifications
+// async function initializePushNotifications(registration) {
+// 	try {
+// 		// First, check if push is supported
+// 		if (!("PushManager" in window)) {
+// 			console.log("Push notifications are not supported in this browser");
+// 			return;
+// 		}
 
-		// If permission is not granted and not denied, request it
-		if (permission !== "granted" && permission !== "denied") {
-			permission = await Notification.requestPermission();
-		}
+// 		// Check if we already have notification permission
+// 		let permission = Notification.permission;
 
-		if (permission !== "granted") {
-			// User denied permission or we don't have it yet
-			console.log("Notification permission not granted");
-			return;
-		}
+// 		// If permission is not granted and not denied, request it
+// 		if (permission !== "granted" && permission !== "denied") {
+// 			permission = await Notification.requestPermission();
+// 		}
 
-		// Get the public VAPID key from the server
-		const response = await fetch("/push/vapidPublicKey");
-		const { publicKey } = await response.json();
+// 		if (permission !== "granted") {
+// 			// User denied permission or we don't have it yet
+// 			console.log("Notification permission not granted");
+// 			return;
+// 		}
 
-		// Convert the VAPID key to the format expected by the browser
-		const convertedKey = urlBase64ToUint8Array(publicKey);
+// 		// Get the public VAPID key from the server
+// 		const response = await fetch("/push/vapidPublicKey");
+// 		const { publicKey } = await response.json();
 
-		// Get the current subscription or subscribe
-		let subscription = await registration.pushManager.getSubscription();
+// 		// Convert the VAPID key to the format expected by the browser
+// 		const convertedKey = urlBase64ToUint8Array(publicKey);
 
-		// If we don't have a subscription yet, create one
-		if (!subscription) {
-			subscription = await registration.pushManager.subscribe({
-				userVisibleOnly: true, // Chrome requires this to be true
-				applicationServerKey: convertedKey,
-			});
-		}
+// 		// Get the current subscription or subscribe
+// 		let subscription = await registration.pushManager.getSubscription();
 
-		// Send the subscription to the server
-		await saveSubscriptionToServer(subscription);
+// 		// If we don't have a subscription yet, create one
+// 		if (!subscription) {
+// 			subscription = await registration.pushManager.subscribe({
+// 				userVisibleOnly: true, // Chrome requires this to be true
+// 				applicationServerKey: convertedKey,
+// 			});
+// 		}
 
-		console.log("Push notification setup complete");
-	} catch (error) {
-		console.error("Error setting up push notifications:", error);
-	}
-}
+// 		// Send the subscription to the server
+// 		await saveSubscriptionToServer(subscription);
 
-// Save subscription to the server
-async function saveSubscriptionToServer(subscription) {
-	try {
-		const response = await fetch("/push/register", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			credentials: "same-origin", // Important for auth cookies
-			body: JSON.stringify(subscription),
-		});
+// 		console.log("Push notification setup complete");
+// 	} catch (error) {
+// 		console.error("Error setting up push notifications:", error);
+// 	}
+// }
 
-		const result = await response.json();
+// // Save subscription to the server
+// async function saveSubscriptionToServer(subscription) {
+// 	try {
+// 		const response = await fetch("/push/register", {
+// 			method: "POST",
+// 			headers: {
+// 				"Content-Type": "application/json",
+// 			},
+// 			credentials: "same-origin", // Important for auth cookies
+// 			body: JSON.stringify(subscription),
+// 		});
 
-		if (!result.success) {
-			console.error("Failed to save subscription to server:", result.error);
-		}
-	} catch (error) {
-		console.error("Error saving subscription to server:", error);
-	}
-}
+// 		const result = await response.json();
 
-// Set up communication with the service worker
-function setupServiceWorkerCommunication() {
-	// Listen for messages from the service worker
-	navigator.serviceWorker.addEventListener("message", (event) => {
-		const data = event.data;
+// 		if (!result.success) {
+// 			console.error("Failed to save subscription to server:", result.error);
+// 		}
+// 	} catch (error) {
+// 		console.error("Error saving subscription to server:", error);
+// 	}
+// }
 
-		// Handle different message types
-		switch (data.type) {
-			case "CHORE_UPDATED":
-				// Show a non-intrusive update notification
-				showUpdateNotification(data);
-				break;
+// // Set up communication with the service worker
+// function setupServiceWorkerCommunication() {
+// 	// Listen for messages from the service worker
+// 	navigator.serviceWorker.addEventListener("message", (event) => {
+// 		const data = event.data;
 
-			case "CHORE_COMPLETED":
-				// Update the UI to reflect the completed chore
-				updateChoreCompletionUI(data);
-				break;
+// 		// Handle different message types
+// 		switch (data.type) {
+// 			case "CHORE_UPDATED":
+// 				// Show a non-intrusive update notification
+// 				showUpdateNotification(data);
+// 				break;
 
-			case "SYNC_REQUIRED":
-				// Perform a sync with the server
-				syncWithServer();
-				break;
-		}
-	});
-}
+// 			case "CHORE_COMPLETED":
+// 				// Update the UI to reflect the completed chore
+// 				updateChoreCompletionUI(data);
+// 				break;
 
-// Show a notification banner in the app
-function showUpdateNotification(data) {
-	const notificationContainer = document.getElementById("update-notification");
-	if (!notificationContainer) return;
+// 			case "SYNC_REQUIRED":
+// 				// Perform a sync with the server
+// 				syncWithServer();
+// 				break;
+// 		}
+// 	});
+// }
 
-	// Create notification content
-	notificationContainer.innerHTML = `
-    <div class="notification-content">
-      <p>${data.title} was updated</p>
-      <button id="refresh-btn">Refresh</button>
-      <button id="dismiss-btn">Dismiss</button>
-    </div>
-  `;
+// // Show a notification banner in the app
+// function showUpdateNotification(data) {
+// 	const notificationContainer = document.getElementById("update-notification");
+// 	if (!notificationContainer) return;
 
-	// Show the notification
-	notificationContainer.classList.add("visible");
+// 	// Create notification content
+// 	notificationContainer.innerHTML = `
+//     <div class="notification-content">
+//       <p>${data.title} was updated</p>
+//       <button id="refresh-btn">Refresh</button>
+//       <button id="dismiss-btn">Dismiss</button>
+//     </div>
+//   `;
 
-	// Add event listeners
-	document.getElementById("refresh-btn").addEventListener("click", () => {
-		window.location.reload();
-	});
+// 	// Show the notification
+// 	notificationContainer.classList.add("visible");
 
-	document.getElementById("dismiss-btn").addEventListener("click", () => {
-		notificationContainer.classList.remove("visible");
-	});
-}
+// 	// Add event listeners
+// 	document.getElementById("refresh-btn").addEventListener("click", () => {
+// 		window.location.reload();
+// 	});
 
-// Update the UI for a completed chore
-function updateChoreCompletionUI(data) {
-	const choreElement = document.getElementById(`chore-${data.choreId}`);
-	if (!choreElement) return;
+// 	document.getElementById("dismiss-btn").addEventListener("click", () => {
+// 		notificationContainer.classList.remove("visible");
+// 	});
+// }
 
-	// Update the UI to show completed state
-	choreElement.classList.add("completed");
+// // Update the UI for a completed chore
+// function updateChoreCompletionUI(data) {
+// 	const choreElement = document.getElementById(`chore-${data.choreId}`);
+// 	if (!choreElement) return;
 
-	// Update the due date
-	const dueDateElement = choreElement.querySelector(".due-date");
-	if (dueDateElement && data.nextDueDate) {
-		dueDateElement.textContent = `Next due: ${new Date(
-			data.nextDueDate
-		).toLocaleDateString()}`;
-	}
+// 	// Update the UI to show completed state
+// 	choreElement.classList.add("completed");
 
-	// Show a subtle notification
-	showToast(`"${data.title}" was completed by someone else`);
-}
+// 	// Update the due date
+// 	const dueDateElement = choreElement.querySelector(".due-date");
+// 	if (dueDateElement && data.nextDueDate) {
+// 		dueDateElement.textContent = `Next due: ${new Date(
+// 			data.nextDueDate
+// 		).toLocaleDateString()}`;
+// 	}
 
-// Helper function to convert base64 to Uint8Array for VAPID key
-function urlBase64ToUint8Array(base64String) {
-	const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-	const base64 = (base64String + padding)
-		.replace(/\-/g, "+")
-		.replace(/_/g, "/");
+// 	// Show a subtle notification
+// 	showToast(`"${data.title}" was completed by someone else`);
+// }
 
-	const rawData = window.atob(base64);
-	const outputArray = new Uint8Array(rawData.length);
+// // Helper function to convert base64 to Uint8Array for VAPID key
+// function urlBase64ToUint8Array(base64String) {
+// 	const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+// 	const base64 = (base64String + padding)
+// 		.replace(/\-/g, "+")
+// 		.replace(/_/g, "/");
 
-	for (let i = 0; i < rawData.length; ++i) {
-		outputArray[i] = rawData.charCodeAt(i);
-	}
-	return outputArray;
-}
+// 	const rawData = window.atob(base64);
+// 	const outputArray = new Uint8Array(rawData.length);
 
-// Show a toast message
-function showToast(message) {
-	const toast = document.createElement("div");
-	toast.className = "toast";
-	toast.textContent = message;
+// 	for (let i = 0; i < rawData.length; ++i) {
+// 		outputArray[i] = rawData.charCodeAt(i);
+// 	}
+// 	return outputArray;
+// }
 
-	document.body.appendChild(toast);
+// // Show a toast message
+// function showToast(message) {
+// 	const toast = document.createElement("div");
+// 	toast.className = "toast";
+// 	toast.textContent = message;
 
-	// Remove after 3 seconds
-	setTimeout(() => {
-		toast.classList.add("fade-out");
-		setTimeout(() => {
-			document.body.removeChild(toast);
-		}, 300);
-	}, 3000);
-}
+// 	document.body.appendChild(toast);
 
-// Sync with the server
-async function syncWithServer() {
-	try {
-		const response = await fetch("/chores/all");
-		if (!response.ok) throw new Error("Failed to sync with server");
+// 	// Remove after 3 seconds
+// 	setTimeout(() => {
+// 		toast.classList.add("fade-out");
+// 		setTimeout(() => {
+// 			document.body.removeChild(toast);
+// 		}, 300);
+// 	}, 3000);
+// }
 
-		const data = await response.json();
+// // Sync with the server
+// async function syncWithServer() {
+// 	try {
+// 		const response = await fetch("/chores/all");
+// 		if (!response.ok) throw new Error("Failed to sync with server");
 
-		if (data.success) {
-			// Update the UI with the new data
-			updateChoresUI(data.chores);
-		}
-	} catch (error) {
-		console.error("Error syncing with server:", error);
-	}
-}
+// 		const data = await response.json();
+
+// 		if (data.success) {
+// 			// Update the UI with the new data
+// 			updateChoresUI(data.chores);
+// 		}
+// 	} catch (error) {
+// 		console.error("Error syncing with server:", error);
+// 	}
+// }

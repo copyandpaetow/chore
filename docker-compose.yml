@@ -9,6 +9,7 @@ services:
     volumes:
       - ./:/app
       - ./db:/app/db
+      - ./node_modules:/app/node_modules
     environment:
       - NODE_ENV=production
       - DB_PATH=/app/db/main.db

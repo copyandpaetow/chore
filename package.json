@@ -4,21 +4,22 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"build": "npm run build:client && npm run build:styles && npm run build:server",
-		"dev": "npm run watch:client & npm run watch:styles & npm run watch:server & wait",
+		"start": "npm run build:client && npm run build:server",
+		"dev": "npm run watch:client & npm run watch:server & wait",
 		"watch:server": "node --env-file config.dev.env --experimental-sqlite --watch src/index.ts",
-		"build:server": "node --env-file config.prod.env --experimental-sqlite src/index.ts",
-		"watch:client": "tsc -p tsconfig.client.json --watch",
-		"build:client": "tsc -p tsconfig.client.json",
-		"watch:styles": "node --watch build/transform-css.ts",
-		"build:styles": "node build/transform-css.ts"
+		"start:server": "node --env-file config.prod.env --experimental-sqlite src/index.ts",
+		"watch:client": "node build.ts",
+		"build:client": "node build.ts"
 	},
+	"browserslist": "> 0.5%, last 2 versions, not dead",
 	"devDependencies": {
+		"@chialab/esbuild-plugin-html": "^0.18.2",
 		"@types/bcrypt": "^5.0.2",
 		"@types/cors": "^2.8.18",
 		"@types/express": "^5.0.1",
 		"@types/node": "^22.15.17",
 		"@types/web-push": "^3.6.4",
+		"esbuild": "^0.25.4",
 		"typescript": "^5.8.3"
 	},
 	"dependencies": {
@@ -27,8 +28,8 @@
 		"bcrypt": "^6.0.0",
 		"cors": "^2.8.5",
 		"express": "^5.1.0",
+		"grundlage": "^0.0.1",
 		"happy-dom": "^17.4.6",
-		"lightningcss": "^1.30.1",
 		"web-push": "^3.6.7"
 	}
 }

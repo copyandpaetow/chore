@@ -1,6 +1,6 @@
 // auth.ts - Authentication middleware
 
-import type Express from "express";
+import { type Request, type Response, type NextFunction } from "express";
 import {
 	deleteSessionTokenCookie,
 	parseCookies,
@@ -14,9 +14,9 @@ import { config } from "../../config.ts";
 export const createAuthMiddleware =
 	(userQueries: UserQueries, sessionQueries: SessionQueries) =>
 	async (
-		req: Express.Request,
-		res: Express.Response,
-		nextFunction: Express.NextFunction
+		req: Request,
+		res: Response,
+		nextFunction: NextFunction
 	): Promise<void> => {
 		// CSRF protection for non-GET requests
 		if (req.method !== "GET" && config.isProduction) {

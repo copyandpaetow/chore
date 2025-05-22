@@ -15,10 +15,8 @@ dist-ssr
 # databases
 *.db
 
-#public
-public
-
 # env
+.env.*
 *.env
 
 # Editor directories and files
