@@ -8,7 +8,7 @@
 	"theme_color": "#4caf50",
 	"icons": [
 		{
-			"src": "/icon.png",
+			"src": "./icon.png",
 			"sizes": "512x512",
 			"type": "image/png"
 		}
@@ -19,14 +19,14 @@
 			"short_name": "Add",
 			"description": "Create a new chore",
 			"url": "/chores/new",
-			"icons": [{ "src": "/icon.png", "sizes": "96x96" }]
+			"icons": [{ "src": "./icon.png", "sizes": "96x96" }]
 		},
 		{
 			"name": "Due Today",
 			"short_name": "Today",
 			"description": "View chores due today",
 			"url": "/chores?filter=today",
-			"icons": [{ "src": "/icon.png", "sizes": "96x96" }]
+			"icons": [{ "src": "./icon.png", "sizes": "96x96" }]
 		}
 	]
 }

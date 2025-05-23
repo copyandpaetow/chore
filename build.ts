@@ -5,7 +5,7 @@ await esbuild.build({
 	entryPoints: ["src/pages/**/*.html"],
 	outdir: "dist",
 	entryNames: "[name]",
-	assetNames: "[name]",
+	assetNames: "assets/[name]",
 	chunkNames: "[ext]/[name]",
 	plugins: [htmlPlugin()],
 	sourcemap: true,

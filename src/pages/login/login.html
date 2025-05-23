@@ -5,7 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="stylesheet" href="../../client/css/main.css" />
 		<script type="module" src="../../client/js/main.ts"></script>
-		<title>Chore</title>
+		<title>Login</title>
 	</head>
 	<body>
 		<h1>Login</h1>
@@ -13,11 +13,24 @@
 			<form action="/login" method="post" id="login">
 				<label>
 					name
-					<input type="text" id="username" name="username" />
+					<input
+						type="text"
+						id="username"
+						name="username"
+						required
+						placeholder="e.g. tim timson"
+					/>
 				</label>
 				<label>
 					password
-					<input type="password" id="password" name="password" />
+					<input
+						type="password"
+						id="password"
+						name="password"
+						required
+						minlength="3"
+						placeholder="****"
+					/>
 				</label>
 
 				<button type="submit">submit</button>

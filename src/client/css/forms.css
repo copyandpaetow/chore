@@ -1,0 +1,11 @@
+input {
+	outline: 1px solid transparent;
+}
+
+input:invalid:not(:placeholder-shown):focus {
+	outline-color: orange;
+}
+
+input:valid:not(:placeholder-shown):focus {
+	outline-color: green;
+}

@@ -5,9 +5,39 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="stylesheet" href="../../client/css/main.css" />
 		<script type="module" src="../../client/js/main.ts"></script>
-		<title>Chore</title>
+		<title>create-chore</title>
 	</head>
 	<body>
-		<h1>error</h1>
+		<h1>create-chore</h1>
+		<main>
+			<form action="/create" method="post" id="create">
+				<label>
+					title
+					<input type="text" id="title" name="title" />
+				</label>
+				<frameset>
+					<legend>frequency</legend>
+					<label>
+						weekly
+						<input type="radio" name="frequency" id="weekly" value="weekly" />
+					</label>
+					<label>
+						monthly
+						<input type="radio" name="frequency" id="monthly" value="monthly" />
+					</label>
+					<label>
+						quarterly
+						<input
+							type="radio"
+							name="frequency"
+							id="quarterly"
+							value="quarterly"
+						/>
+					</label>
+				</frameset>
+
+				<button type="submit">submit</button>
+			</form>
+		</main>
 	</body>
 </html>

@@ -1,4 +1,5 @@
 console.log("main");
+import { render } from "grundlage";
 
 // async function updateCacheFromCurrentDOM() {
 // 	// Get the current state of the page after JS modifications

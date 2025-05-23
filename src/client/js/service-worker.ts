@@ -14,8 +14,8 @@ const STATIC_ASSETS = [
 	"/js/main.js",
 	"/js/service-worker.js",
 	"/css/main.css",
-	"/icon.png",
-	"/manifest.json",
+	"/assets/android-chrome-512x512.png",
+	"/assets/manifest.json",
 	// Add other static assets
 ];
 

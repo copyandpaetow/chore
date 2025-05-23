@@ -1,50 +1,59 @@
+import { randomUUID } from "crypto";
 import { type Request, type Response } from "express";
+import { getCurrentUser } from "../user/helper.ts";
+import { type ChoreQueries } from "./queries.ts";
+import { calculateNextDueDate } from "./complete.ts";
 
-export const createChore = () => async (req: Request, res: Response) => {
-	const { title, frequency } = req.body;
+export const createChore =
+	(choreQueries: ChoreQueries) => async (req: Request, res: Response) => {
+		try {
+			const { title, frequency } = req.body;
 
-	if (!title || !frequency) {
-		return res.status(400).json({ error: "Missing required properties" });
-	}
+			if (!title || !frequency) {
+				throw new Error("error: Missing required properties");
+			}
 
-	if (!["weekly", "monthly", "quarterly"].includes(frequency)) {
-		return res.status(400).json({
-			error: "Invalid frequency. Must be weekly, monthly, or quarterly",
-		});
-	}
+			if (!["weekly", "monthly", "quarterly"].includes(frequency)) {
+				throw new Error(
+					"Invalid frequency. Must be weekly, monthly, or quarterly"
+				);
+			}
 
-	const {
-		description = "",
-		difficulty = 3,
-		isPrivate = 0,
-		firstDueDate,
-	} = req.body;
+			const {
+				description = "",
+				difficulty = 3,
+				isPrivate = 0,
+				firstDueDate,
+			} = req.body;
 
-	const user = getCurrentUser(req)!;
-	const choreId = randomUUID();
-	const createdAt = Date.now();
-	const nextDueDate = firstDueDate
-		? new Date(firstDueDate).getTime()
-		: calculateNextDueDate(frequency);
+			const user = getCurrentUser(req)!;
+			const choreId = randomUUID();
+			const createdAt = Date.now();
+			const nextDueDate = firstDueDate
+				? new Date(firstDueDate).getTime()
+				: calculateNextDueDate(frequency);
 
-	const chore = choreQueries.create(
-		choreId,
-		title,
-		description,
-		createdAt,
-		frequency,
-		user.id,
-		nextDueDate,
-		difficulty,
-		isPrivate
-	);
+			const chore = choreQueries.create(
+				choreId,
+				title,
+				description,
+				createdAt,
+				frequency,
+				user.id,
+				nextDueDate,
+				difficulty,
+				isPrivate
+			);
 
-	if (!chore) {
-		return res.status(500).json({ error: "Failed to create chore" });
-	}
-
-	res.json({
-		success: true,
-		chore,
-	});
-};
+			if (!chore) {
+				res.status(500).json({ error: "Failed to create chore" });
+				return;
+			}
+			res.redirect("/");
+		} catch (error) {
+			res.status(401).json({
+				success: false,
+				error,
+			});
+		}
+	};
