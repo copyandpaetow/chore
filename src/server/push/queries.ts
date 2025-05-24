@@ -6,7 +6,7 @@ import { DatabaseSync } from "node:sqlite";
 export type PushSubscription = {
 	id: string;
 	user_id: string;
-	details: string; // JSON stringified PushSubscription object
+	details: string;
 	created_at: number;
 };
 
@@ -16,48 +16,37 @@ export type PushQueries = {
 		subscription: Object
 	): PushSubscription | undefined;
 	getSubscriptionsByUserId(userId: string): PushSubscription[] | undefined;
-	getSubscriptionsByUserIds(userIds: string[]): PushSubscription[] | undefined;
 	getSubscriptionByEndpoint(endpoint: string): PushSubscription | undefined;
 	deleteSubscription(id: string): void;
 	deleteSubscriptionByEndpoint(endpoint: string): void;
 };
 
 export const createPushQueries = (database: DatabaseSync): PushQueries => {
-	// Add subscription to database
 	const addSubscription = database.prepare(`
     INSERT INTO push_subscription (id, user_id, details, created_at)
     VALUES (?, ?, ?, ?)
     RETURNING id, user_id, details, created_at
   `);
 
-	// Get subscriptions by user ID
 	const getSubscriptionsByUser = database.prepare(`
     SELECT * FROM push_subscription 
     WHERE user_id = ?
   `);
 
-	// Get a subscription by endpoint URL
 	const getSubscriptionByEndpoint = database.prepare(`
     SELECT * FROM push_subscription 
     WHERE json_extract(details, '$.endpoint') = ?
   `);
 
-	// Delete a subscription by ID
 	const deleteSubscriptionById = database.prepare(`
     DELETE FROM push_subscription 
     WHERE id = ?
   `);
 
-	// Delete a subscription by endpoint URL
 	const deleteSubscriptionByEndpointUrl = database.prepare(`
     DELETE FROM push_subscription 
     WHERE json_extract(details, '$.endpoint') = ?
   `);
-
-	// Helper function to get placeholders for SQL IN clause
-	const getPlaceholders = (count: number): string => {
-		return Array(count).fill("?").join(",");
-	};
 
 	return {
 		saveSubscription(
@@ -69,17 +58,13 @@ export const createPushQueries = (database: DatabaseSync): PushQueries => {
 			}
 
 			try {
-				// Check if this subscription already exists by endpoint
 				const endpoint = (subscription as any).endpoint;
 				const existingSubscription = this.getSubscriptionByEndpoint(endpoint);
 
 				if (existingSubscription) {
-					// If it exists but for a different user, update the user_id
 					if (existingSubscription.user_id !== userId) {
-						// Delete the old one and create a new one
 						this.deleteSubscription(existingSubscription.id);
 					} else {
-						// Same user, same endpoint - no need to update
 						return existingSubscription;
 					}
 				}
@@ -110,30 +95,6 @@ export const createPushQueries = (database: DatabaseSync): PushQueries => {
 			} catch (error) {
 				console.error("Database error:", error);
 				throw new Error("Failed to get push subscriptions");
-			}
-		},
-
-		getSubscriptionsByUserIds(
-			userIds: string[]
-		): PushSubscription[] | undefined {
-			if (!userIds || userIds.length === 0) {
-				return [];
-			}
-
-			try {
-				// Create a dynamic query based on the number of userIds
-				const placeholders = getPlaceholders(userIds.length);
-				const query = `
-          SELECT * FROM push_subscription 
-          WHERE user_id IN (${placeholders})
-        `;
-
-				// Prepare and execute the query
-				const statement = database.prepare(query);
-				return statement.all(...userIds) as PushSubscription[] | undefined;
-			} catch (error) {
-				console.error("Database error:", error);
-				throw new Error("Failed to get push subscriptions by user IDs");
 			}
 		},
 

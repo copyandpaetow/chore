@@ -1,242 +1,138 @@
-console.log("main");
-import { render } from "grundlage";
+const SERVICE_WORKER_PATH = "service-worker.js";
 
-// async function updateCacheFromCurrentDOM() {
-// 	// Get the current state of the page after JS modifications
-// 	const currentHTML = document.documentElement.outerHTML;
-
-// 	// Create a new response with this HTML
-// 	const newResponse = new Response(currentHTML, {
-// 		headers: {
-// 			"Content-Type": "text/html",
-// 		},
-// 	});
-
-// 	// Update the cache
-// 	const cache = await caches.open("chores-cache");
-// 	await cache.put("/chores", newResponse);
-// }
-
-// // In your main client JavaScript file (e.g., main.js)
-const SERVICE_WORKER_PATH = "/js/service-worker.js";
-
-// Initialize the PWA functionality
 async function initializePWA() {
-	// Check if service workers are supported
-	if ("serviceWorker" in navigator) {
-		try {
-			// Register the service worker
-			const registration = await navigator.serviceWorker.register(
-				SERVICE_WORKER_PATH
-			);
-			console.log("ServiceWorker registered with scope:", registration.scope);
+	try {
+		console.log("Starting service worker registration...");
 
-			// Initialize push notifications
-			// await initializePushNotifications(registration);
+		const registration = await navigator.serviceWorker.register(
+			SERVICE_WORKER_PATH,
+			{
+				scope: "/",
+			}
+		);
 
-			// // Setup communication with the service worker
-			// setupServiceWorkerCommunication();
-		} catch (error) {
-			console.error("ServiceWorker registration failed:", error);
-		}
-	} else {
-		console.log("Service workers are not supported in this browser");
+		console.log("Registration successful:", registration);
+		console.log(
+			"Service worker state:",
+			registration.installing?.state,
+			registration.waiting?.state,
+			registration.active?.state
+		);
+
+		registration.addEventListener("updatefound", () => {
+			console.log("update found");
+		});
+
+		console.log("Waiting for service worker to be ready...");
+		const readyRegistration = await navigator.serviceWorker.ready;
+		console.log("Service worker ready:", readyRegistration);
+
+		await initializePushNotifications(readyRegistration);
+		console.log("ServiceWorker registered with scope:", registration.scope);
+		return registration;
+	} catch (error) {
+		console.error("ServiceWorker registration failed:", error);
 	}
 }
 
-initializePWA();
+document.getElementById("push")?.addEventListener("click", initializePWA);
 
-// // Initialize push notifications
-// async function initializePushNotifications(registration) {
-// 	try {
-// 		// First, check if push is supported
-// 		if (!("PushManager" in window)) {
-// 			console.log("Push notifications are not supported in this browser");
-// 			return;
-// 		}
+document.addEventListener("beforeinstallprompt", () => {
+	console.log("PWA was installed");
+	alert("PWA was installed");
+	initializePWA();
+});
 
-// 		// Check if we already have notification permission
-// 		let permission = Notification.permission;
+document.addEventListener("appinstalled", () => {
+	console.log("PWA was installed");
+	alert("PWA was installed");
+	initializePWA();
+});
 
-// 		// If permission is not granted and not denied, request it
-// 		if (permission !== "granted" && permission !== "denied") {
-// 			permission = await Notification.requestPermission();
-// 		}
+//
 
-// 		if (permission !== "granted") {
-// 			// User denied permission or we don't have it yet
-// 			console.log("Notification permission not granted");
-// 			return;
-// 		}
+function urlBase64ToUint8Array(base64String: string) {
+	const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+	const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
 
-// 		// Get the public VAPID key from the server
-// 		const response = await fetch("/push/vapidPublicKey");
-// 		const { publicKey } = await response.json();
+	const rawData = window.atob(base64);
+	const outputArray = new Uint8Array(rawData.length);
 
-// 		// Convert the VAPID key to the format expected by the browser
-// 		const convertedKey = urlBase64ToUint8Array(publicKey);
+	for (let i = 0; i < rawData.length; ++i) {
+		outputArray[i] = rawData.charCodeAt(i);
+	}
+	return outputArray;
+}
 
-// 		// Get the current subscription or subscribe
-// 		let subscription = await registration.pushManager.getSubscription();
+async function getVapidPublicKey() {
+	const response = await fetch("/vapidPublicKey");
+	const data = await response.json();
+	return urlBase64ToUint8Array(data.publicKey);
+}
 
-// 		// If we don't have a subscription yet, create one
-// 		if (!subscription) {
-// 			subscription = await registration.pushManager.subscribe({
-// 				userVisibleOnly: true, // Chrome requires this to be true
-// 				applicationServerKey: convertedKey,
-// 			});
-// 		}
+async function initializePushNotifications(
+	registration: ServiceWorkerRegistration
+) {
+	try {
+		let permission = Notification.permission;
+		console.log(Notification);
 
-// 		// Send the subscription to the server
-// 		await saveSubscriptionToServer(subscription);
+		if (permission !== "granted" && permission !== "denied") {
+			permission = await Notification.requestPermission();
+		}
 
-// 		console.log("Push notification setup complete");
-// 	} catch (error) {
-// 		console.error("Error setting up push notifications:", error);
-// 	}
-// }
+		if (permission !== "granted") {
+			console.log("Notification permission not granted");
+			return;
+		}
 
-// // Save subscription to the server
-// async function saveSubscriptionToServer(subscription) {
-// 	try {
-// 		const response = await fetch("/push/register", {
-// 			method: "POST",
-// 			headers: {
-// 				"Content-Type": "application/json",
-// 			},
-// 			credentials: "same-origin", // Important for auth cookies
-// 			body: JSON.stringify(subscription),
-// 		});
+		const publicKey = await getVapidPublicKey();
+		let subscription = await registration.pushManager.getSubscription();
+		console.log("Existing subscription:", subscription);
 
-// 		const result = await response.json();
+		if (!subscription) {
+			console.log("Push manager available:", registration.pushManager);
 
-// 		if (!result.success) {
-// 			console.error("Failed to save subscription to server:", result.error);
-// 		}
-// 	} catch (error) {
-// 		console.error("Error saving subscription to server:", error);
-// 	}
-// }
+			try {
+				subscription = await registration.pushManager.subscribe({
+					userVisibleOnly: true,
+					applicationServerKey: publicKey,
+				});
+				console.log("New subscription created:", subscription);
+			} catch (subscribeError) {
+				console.error("Subscription creation failed:", subscribeError);
+				console.error("Error name:", subscribeError.name);
+				console.error("Error message:", subscribeError.message);
+				return;
+			}
+		}
 
-// // Set up communication with the service worker
-// function setupServiceWorkerCommunication() {
-// 	// Listen for messages from the service worker
-// 	navigator.serviceWorker.addEventListener("message", (event) => {
-// 		const data = event.data;
+		// Send the subscription to the server
+		await saveSubscriptionToServer(subscription);
 
-// 		// Handle different message types
-// 		switch (data.type) {
-// 			case "CHORE_UPDATED":
-// 				// Show a non-intrusive update notification
-// 				showUpdateNotification(data);
-// 				break;
+		console.log("Push notification setup complete");
+	} catch (error) {
+		console.error("Error setting up push notifications:", error);
+	}
+}
 
-// 			case "CHORE_COMPLETED":
-// 				// Update the UI to reflect the completed chore
-// 				updateChoreCompletionUI(data);
-// 				break;
+async function saveSubscriptionToServer(subscription: PushSubscription) {
+	try {
+		const response = await fetch("/register", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			credentials: "same-origin",
+			body: JSON.stringify(subscription),
+		});
 
-// 			case "SYNC_REQUIRED":
-// 				// Perform a sync with the server
-// 				syncWithServer();
-// 				break;
-// 		}
-// 	});
-// }
+		const result = await response.json();
 
-// // Show a notification banner in the app
-// function showUpdateNotification(data) {
-// 	const notificationContainer = document.getElementById("update-notification");
-// 	if (!notificationContainer) return;
-
-// 	// Create notification content
-// 	notificationContainer.innerHTML = `
-//     <div class="notification-content">
-//       <p>${data.title} was updated</p>
-//       <button id="refresh-btn">Refresh</button>
-//       <button id="dismiss-btn">Dismiss</button>
-//     </div>
-//   `;
-
-// 	// Show the notification
-// 	notificationContainer.classList.add("visible");
-
-// 	// Add event listeners
-// 	document.getElementById("refresh-btn").addEventListener("click", () => {
-// 		window.location.reload();
-// 	});
-
-// 	document.getElementById("dismiss-btn").addEventListener("click", () => {
-// 		notificationContainer.classList.remove("visible");
-// 	});
-// }
-
-// // Update the UI for a completed chore
-// function updateChoreCompletionUI(data) {
-// 	const choreElement = document.getElementById(`chore-${data.choreId}`);
-// 	if (!choreElement) return;
-
-// 	// Update the UI to show completed state
-// 	choreElement.classList.add("completed");
-
-// 	// Update the due date
-// 	const dueDateElement = choreElement.querySelector(".due-date");
-// 	if (dueDateElement && data.nextDueDate) {
-// 		dueDateElement.textContent = `Next due: ${new Date(
-// 			data.nextDueDate
-// 		).toLocaleDateString()}`;
-// 	}
-
-// 	// Show a subtle notification
-// 	showToast(`"${data.title}" was completed by someone else`);
-// }
-
-// // Helper function to convert base64 to Uint8Array for VAPID key
-// function urlBase64ToUint8Array(base64String) {
-// 	const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-// 	const base64 = (base64String + padding)
-// 		.replace(/\-/g, "+")
-// 		.replace(/_/g, "/");
-
-// 	const rawData = window.atob(base64);
-// 	const outputArray = new Uint8Array(rawData.length);
-
-// 	for (let i = 0; i < rawData.length; ++i) {
-// 		outputArray[i] = rawData.charCodeAt(i);
-// 	}
-// 	return outputArray;
-// }
-
-// // Show a toast message
-// function showToast(message) {
-// 	const toast = document.createElement("div");
-// 	toast.className = "toast";
-// 	toast.textContent = message;
-
-// 	document.body.appendChild(toast);
-
-// 	// Remove after 3 seconds
-// 	setTimeout(() => {
-// 		toast.classList.add("fade-out");
-// 		setTimeout(() => {
-// 			document.body.removeChild(toast);
-// 		}, 300);
-// 	}, 3000);
-// }
-
-// // Sync with the server
-// async function syncWithServer() {
-// 	try {
-// 		const response = await fetch("/chores/all");
-// 		if (!response.ok) throw new Error("Failed to sync with server");
-
-// 		const data = await response.json();
-
-// 		if (data.success) {
-// 			// Update the UI with the new data
-// 			updateChoresUI(data.chores);
-// 		}
-// 	} catch (error) {
-// 		console.error("Error syncing with server:", error);
-// 	}
-// }
+		if (!result.success) {
+			console.error("Failed to save subscription to server:", result.error);
+		}
+	} catch (error) {
+		console.error("Error saving subscription to server:", error);
+	}
+}

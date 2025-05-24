@@ -4,6 +4,7 @@ import { getCurrentUser } from "../user/helper.ts";
 import { type ChoreQueries } from "./queries.ts";
 import { type Request, type Response } from "express";
 import { type PushQueries } from "../push/queries.ts";
+import { type UserQueries } from "../user/queries.ts";
 
 export const calculateNextDueDate = (
 	frequency: string,
@@ -29,7 +30,11 @@ export const calculateNextDueDate = (
 };
 
 export const completeChore =
-	(choreQueries: ChoreQueries, pushQueries: PushQueries) =>
+	(
+		choreQueries: ChoreQueries,
+		pushQueries: PushQueries,
+		userQueries: UserQueries
+	) =>
 	async (req: Request, res: Response) => {
 		try {
 			const choreId = req.params.id;
@@ -61,10 +66,8 @@ export const completeChore =
 				throw new Error("Failed to update due date");
 			}
 
-			const notifyUserIds = [chore.owner_id];
-
 			await sendNotificationToUsers(
-				notifyUserIds,
+				userQueries.getAllIds(),
 				{
 					type: "CHORE_COMPLETED",
 					choreId: chore.id,

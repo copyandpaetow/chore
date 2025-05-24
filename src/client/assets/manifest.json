@@ -1,0 +1,19 @@
+{
+	"name": "Chores App",
+	"short_name": "Chores",
+	"description": "Manage household chores and tasks",
+	"start_url": "/",
+	"display": "standalone",
+	"background_color": "#ffffff",
+	"theme_color": "#4caf50",
+	"icons": [{ "src": "./icon.png", "sizes": "512x512" }],
+	"shortcuts": [
+		{
+			"name": "Add Chore",
+			"short_name": "Add",
+			"description": "Create a new chore",
+			"url": "/create",
+			"icons": [{ "src": "./icon.png", "sizes": "512x512" }]
+		}
+	]
+}

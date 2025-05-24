@@ -6,9 +6,10 @@ await esbuild.build({
 	outdir: "dist",
 	entryNames: "[name]",
 	assetNames: "assets/[name]",
-	chunkNames: "[ext]/[name]",
+	chunkNames: "[name]",
 	plugins: [htmlPlugin()],
 	sourcemap: true,
 	minify: false,
 	bundle: true,
+	target: "es2024",
 });

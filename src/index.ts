@@ -2,7 +2,7 @@ import cors from "cors";
 import express, { type Request, type Response } from "express";
 import fs from "fs";
 import { Document, Window } from "happy-dom";
-import http from "http";
+import https from "https";
 import path from "path";
 import { config } from "./config.ts";
 import { transformHome } from "./pages/home/transform.ts";
@@ -19,9 +19,9 @@ import { reserveChore } from "./server/chores/reserve.ts";
 import { initializeSchema } from "./server/db/index.ts";
 import { getPublicVapidKey } from "./server/push/keys.ts";
 import { createPushQueries } from "./server/push/queries.ts";
-import { createUserQueries } from "./server/user/queries.ts";
 import { registerPush } from "./server/push/register.ts";
 import { unregisterPush } from "./server/push/unregister.ts";
+import { createUserQueries } from "./server/user/queries.ts";
 
 const PAGES = {
 	HOME: "dist/home.html",
@@ -45,7 +45,10 @@ const renderPage = (templatePath: string, transform = noopTransform) => {
 			await window.happyDOM.waitUntilComplete();
 
 			const transformedDom = transform(document);
-			res.send(transformedDom.documentElement.outerHTML);
+			res.set("Content-Type", "text/html");
+
+			console.log(req.originalUrl, req.url, req.baseUrl);
+			res.send("<!DOCTYPE html>" + transformedDom.documentElement.outerHTML);
 		} catch (error) {
 			res.status(500).send({
 				success: false,
@@ -65,8 +68,14 @@ try {
 
 	const authMiddleWare = createAuthMiddleware(userQueries, sessionQueries);
 
+	const httpsOptions = {
+		key: fs.readFileSync(path.join(process.cwd(), "certs", "localhost.key")),
+		cert: fs.readFileSync(path.join(process.cwd(), "certs", "localhost.crt")),
+	};
+	console.log("Certificate files loaded successfully");
+
 	const app = express();
-	const httpServer = http.createServer(app);
+	const httpsServer = https.createServer(httpsOptions, app);
 
 	app.use(
 		cors({
@@ -95,11 +104,11 @@ try {
 	app.post(
 		"/:id/complete",
 		authMiddleWare,
-		completeChore(choreQueries, pushQueries)
+		completeChore(choreQueries, pushQueries, userQueries)
 	);
 	app.post("/:id/reserve", authMiddleWare, reserveChore(choreQueries));
 	app.delete("/:id", authMiddleWare, deleteChore(choreQueries));
-	app.get("/vapidPublicKey", getPublicVapidKey());
+	app.get("/vapidPublicKey", authMiddleWare, getPublicVapidKey());
 	app.post("/register", authMiddleWare, registerPush(pushQueries));
 	app.post("/unregister", authMiddleWare, unregisterPush(pushQueries));
 
@@ -111,8 +120,12 @@ try {
 		renderPage(PAGES.NOT_FOUND)(req, res);
 	});
 
-	httpServer.listen(config.port, () => {
-		console.log(`Server running on port ${config.port}`);
+	httpsServer.on("error", (error) => {
+		console.error("HTTPS Server error:", error);
+	});
+
+	httpsServer.listen(config.port, () => {
+		console.log(`HTTPS Server running on https://localhost:${config.port}`);
 	});
 } catch (error) {
 	console.error("Failed to start server:", error);

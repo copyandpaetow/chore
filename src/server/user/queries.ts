@@ -10,6 +10,7 @@ export type UserQueries = {
 	): User | undefined;
 	getByName(name: string): User | undefined;
 	getById(id: string): User | undefined;
+	getAllIds(): string[];
 };
 
 export const createUserQueries = (database: DatabaseSync): UserQueries => {
@@ -25,6 +26,10 @@ export const createUserQueries = (database: DatabaseSync): UserQueries => {
 
 	const getUserById = database.prepare(`
   SELECT * FROM user WHERE id = ?
+`);
+
+	const getAllUserIds = database.prepare(`
+  SELECT id FROM user
 `);
 
 	return {
@@ -63,6 +68,16 @@ export const createUserQueries = (database: DatabaseSync): UserQueries => {
 			} catch (error) {
 				console.error("Database error:", error);
 				throw new Error("Failed to get user by id");
+			}
+		},
+		getAllIds() {
+			try {
+				const idResult =
+					(getAllUserIds.all() as Array<{ id: string }> | undefined) ?? [];
+				return idResult.map((entry) => entry.id);
+			} catch (error) {
+				console.error("Database error:", error);
+				throw new Error("Failed to get users");
 			}
 		},
 	};

@@ -12,7 +12,6 @@ export const sendNotificationToUsers = async (
 	}
 
 	try {
-		// Filter out excluded user
 		const targetUserIds = excludeUserId
 			? userIds.filter((id) => id !== excludeUserId)
 			: userIds;
@@ -21,38 +20,25 @@ export const sendNotificationToUsers = async (
 			return { success: true };
 		}
 
-		// Get subscriptions for these users
-		const subscriptions =
-			pushQueries.getSubscriptionsByUserIds(targetUserIds) || [];
+		for (const userId of targetUserIds) {
+			const subscriptions = pushQueries.getSubscriptionsByUserId(userId) || [];
 
-		if (subscriptions.length === 0) {
-			return { success: true };
-		}
-
-		const errors: string[] = [];
-
-		// Send to each subscription
-		const sendPromises = subscriptions.map(async (sub) => {
-			try {
-				const parsedSubscription = JSON.parse(sub.details);
-				await webpush.sendNotification(
-					parsedSubscription,
-					JSON.stringify(payload)
-				);
-				return true;
-			} catch (error) {
-				pushQueries.deleteSubscription(sub.id);
-
-				errors.push(`Failed to send to subscription ${sub.id}: ${error}`);
-				return false;
+			for await (const sub of subscriptions) {
+				try {
+					const parsedSubscription = JSON.parse(sub.details);
+					await webpush.sendNotification(
+						parsedSubscription,
+						JSON.stringify(payload)
+					);
+				} catch (error) {
+					pushQueries.deleteSubscription(sub.id);
+					console.error(`Failed to send to subscription ${sub.id}: ${error}`);
+				}
 			}
-		});
-
-		await Promise.all(sendPromises);
+		}
 
 		return {
 			success: true,
-			errors: errors.length > 0 ? errors : undefined,
 		};
 	} catch (error) {
 		console.error("Error sending push notifications:", error);

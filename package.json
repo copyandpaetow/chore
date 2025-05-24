@@ -6,12 +6,12 @@
 	"scripts": {
 		"start": "npm run build:client && npm run build:server",
 		"dev": "npm run watch:client & npm run watch:server & wait",
-		"watch:server": "node --env-file config.dev.env --experimental-sqlite --watch-path=./src/server --watch src/index.ts",
+		"watch:server": "node --env-file config.dev.env --experimental-sqlite --watch src/index.ts",
 		"start:server": "node --env-file config.prod.env --experimental-sqlite src/index.ts",
-		"watch:client": "node build.ts --watch-path=./src/pages",
-		"build:client": "node build.ts"
+		"watch:client": " npm run clean && node build.ts",
+		"build:client": "node build.ts",
+		"clean": "rm -rf dist"
 	},
-	"browserslist": "> 0.5%, last 2 versions, not dead",
 	"devDependencies": {
 		"@chialab/esbuild-plugin-html": "^0.18.2",
 		"@types/bcrypt": "^5.0.2",
